@@ -1,0 +1,38 @@
+import type { SaveData } from './types'
+
+export const SAVE_KEY = 'project-origin-save-v1'
+
+export const emptySave = (audioEnabled = true): SaveData => ({
+  playerName: '',
+  introCompleted: false,
+  completedLabs: { cv: false, ml: false, nlp: false },
+  stageProgress: { cv: 0, ml: 0, nlp: 0 },
+  achievements: [],
+  audioEnabled,
+})
+
+export function loadSave(): SaveData | null {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as Partial<SaveData>
+    if (!parsed.completedLabs || !parsed.stageProgress) return null
+    return {
+      ...emptySave(parsed.audioEnabled ?? true),
+      ...parsed,
+      completedLabs: { ...emptySave().completedLabs, ...parsed.completedLabs },
+      stageProgress: { ...emptySave().stageProgress, ...parsed.stageProgress },
+      achievements: Array.isArray(parsed.achievements) ? parsed.achievements : [],
+    }
+  } catch {
+    return null
+  }
+}
+
+export function persistSave(save: SaveData): void {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(save))
+  } catch {
+    // The game remains playable when storage is unavailable.
+  }
+}
