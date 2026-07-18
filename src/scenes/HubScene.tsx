@@ -67,7 +67,7 @@ export function HubScene() {
         <Tree className="tree-a" /><Tree className="tree-b" /><Tree className="tree-c" /><Tree className="tree-d" />
         <Lamp className="lamp-a" /><Lamp className="lamp-b" /><Lamp className="lamp-c" /><Lamp className="lamp-d" />
         <div ref={movement.playerRef} className="player-on-map" style={movement.playerStyle} data-player-direction={movement.direction}>
-          <PixelRobot direction={movement.direction} walking={movement.walking} visionUpgraded={state.save.completedLabs.cv} />
+          <PixelRobot direction={movement.direction} walking={movement.walking} visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} />
         </div>
       </div>
       <div className="interaction-prompt"><span>E</span>{prompt}</div>

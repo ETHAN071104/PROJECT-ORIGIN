@@ -25,13 +25,19 @@ export function loadSave(): SaveData | null {
       achievements: Array.isArray(parsed.achievements) ? parsed.achievements : [],
     }
     save.stageProgress.cv = Math.max(0, Math.min(4, Number(save.stageProgress.cv) || 0))
-    save.stageProgress.ml = Math.max(0, Number(save.stageProgress.ml) || 0)
+    save.stageProgress.ml = Math.max(0, Math.min(4, Number(save.stageProgress.ml) || 0))
     save.stageProgress.nlp = Math.max(0, Number(save.stageProgress.nlp) || 0)
 
     // Saves created by the former one-button CV placeholder resume after the
     // recorded stage instead of incorrectly skipping the new complete lab.
     if (save.completedLabs.cv && save.stageProgress.cv < 4 && !save.achievements.includes('MACHINES_FIRST_SIGHT')) {
       save.completedLabs.cv = false
+    }
+    // The former ML placeholder marked the lab complete at stage 1. Those
+    // saves resume the real lab from its first activity instead of skipping it.
+    if (save.completedLabs.ml && !save.achievements.includes('PATTERN_FINDER')) {
+      save.completedLabs.ml = false
+      save.stageProgress.ml = 0
     }
     return save
   } catch {

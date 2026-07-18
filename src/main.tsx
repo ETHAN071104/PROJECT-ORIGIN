@@ -4,6 +4,7 @@ import App from './App'
 import { GameProvider } from './game/GameContext'
 import './styles/index.css'
 import './styles/cv.css'
+import './styles/ml.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

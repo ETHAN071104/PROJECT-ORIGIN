@@ -55,6 +55,9 @@ export type GameAction =
   | { type: 'RECORD_CV_STAGE'; stage: 1 | 2 | 3 }
   | { type: 'COMPLETE_CV_LAB' }
   | { type: 'FINISH_CV_LAB' }
+  | { type: 'RECORD_ML_STAGE'; stage: 1 | 2 | 3 }
+  | { type: 'COMPLETE_ML_LAB' }
+  | { type: 'FINISH_ML_LAB' }
   | { type: 'ACKNOWLEDGE_LAB_COMPLETE' }
   | { type: 'OPEN_RESEARCH' }
   | { type: 'TOGGLE_AUDIO' }

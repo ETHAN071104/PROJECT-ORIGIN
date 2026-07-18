@@ -109,6 +109,37 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
     case 'FINISH_CV_LAB':
       return state.currentLab === 'cv' ? { ...state, screen: 'LAB_COMPLETE' } : state
+    case 'RECORD_ML_STAGE':
+      if (state.currentLab !== 'ml') return state
+      return {
+        ...state,
+        hasStoredSave: true,
+        save: {
+          ...state.save,
+          stageProgress: {
+            ...state.save.stageProgress,
+            ml: Math.max(state.save.stageProgress.ml, action.stage),
+          },
+        },
+      }
+    case 'COMPLETE_ML_LAB': {
+      if (state.currentLab !== 'ml') return state
+      const achievement = 'PATTERN_FINDER'
+      return {
+        ...state,
+        hasStoredSave: true,
+        save: {
+          ...state.save,
+          completedLabs: { ...state.save.completedLabs, ml: true },
+          stageProgress: { ...state.save.stageProgress, ml: 4 },
+          achievements: state.save.achievements.includes(achievement)
+            ? state.save.achievements
+            : [...state.save.achievements, achievement],
+        },
+      }
+    }
+    case 'FINISH_ML_LAB':
+      return state.currentLab === 'ml' ? { ...state, screen: 'LAB_COMPLETE' } : state
     case 'ACKNOWLEDGE_LAB_COMPLETE':
       return {
         ...state,

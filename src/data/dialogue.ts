@@ -33,23 +33,28 @@ export const dialogueScripts: Record<string, DialogueLine[]> = {
     {
       speaker: 'PROFESSOR PATTERN',
       portrait: 'mentor',
-      text: 'A visitor! I predicted this. Admittedly, after I saw you walk in.',
+      text: 'I do not need perfect memory.',
     },
     {
       speaker: 'PROFESSOR PATTERN',
       portrait: 'mentor',
-      text: 'I am Professor Pattern. You will study examples, guess the hidden rule, and test your guess.',
+      text: 'I need examples.',
+    },
+    {
+      speaker: 'PROFESSOR PATTERN',
+      portrait: 'mentor',
+      text: 'Preferably many examples.',
     },
     {
       speaker: '{{player}}',
       portrait: 'player',
-      text: 'What if my first guess is wrong?',
-      choices: ['Try another pattern', 'Recalculate dramatically'],
+      text: 'Then let us find the pattern.',
+      choices: ['Show me the data', 'Recalculate dramatically'],
     },
     {
       speaker: 'PROFESSOR PATTERN',
       portrait: 'mentor',
-      text: 'Excellent. Wrong guesses are data wearing a fake moustache. Let us begin.',
+      text: 'Excellent. Wrong guesses are data wearing a fake moustache.',
     },
   ],
   'nlp-intro': [

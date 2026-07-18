@@ -9,6 +9,7 @@ import { LabInteriorScene } from './scenes/LabInteriorScene'
 import { NameEntryScene } from './scenes/NameEntryScene'
 import { StagePlaceholderScene } from './scenes/StagePlaceholderScene'
 import { CvLabScene } from './scenes/CvLabScene'
+import { MlLabScene } from './scenes/MlLabScene'
 import { TitleScreen } from './scenes/TitleScreen'
 
 export default function App() {
@@ -21,7 +22,9 @@ export default function App() {
       {state.screen === 'HUB' && <HubScene />}
       {state.screen === 'LAB_INTERIOR' && <LabInteriorScene />}
       {state.screen === 'DIALOGUE' && <DialogueScene />}
-      {state.screen === 'MINIGAME' && (state.currentLab === 'cv' ? <CvLabScene /> : <StagePlaceholderScene />)}
+      {state.screen === 'MINIGAME' && (
+        state.currentLab === 'cv' ? <CvLabScene /> : state.currentLab === 'ml' ? <MlLabScene /> : <StagePlaceholderScene />
+      )}
       {state.screen === 'LAB_COMPLETE' && <LabCompleteScene />}
       {state.screen === 'ENDING' && <EndingScene />}
     </GameViewport>

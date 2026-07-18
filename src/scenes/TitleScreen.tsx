@@ -26,7 +26,7 @@ export function TitleScreen() {
         <h1>PROJECT <span>ORIGIN</span></h1>
         <p className="tagline">Every AI has an origin. This is yours.</p>
       </div>
-      <div className="title-robot" aria-hidden="true"><PixelRobot /></div>
+      <div className="title-robot" aria-hidden="true"><PixelRobot visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} /></div>
       <div className="title-menu">
         <PixelButton onClick={() => act('NEW_GAME')}>New Game</PixelButton>
         {state.hasStoredSave && (

@@ -31,6 +31,12 @@ export function LabCompleteScene() {
             <strong>Machine's First Sight</strong>
           </div>
         )}
+        {state.currentLab === 'ml' && state.save.achievements.includes('PATTERN_FINDER') && (
+          <div className="achievement-toast achievement-ml" role="status">
+            <span>ACHIEVEMENT UNLOCKED</span>
+            <strong>Pattern Finder</strong>
+          </div>
+        )}
         <PixelButton onClick={() => {
           playTone(state.save.audioEnabled)
           dispatch({ type: 'ACKNOWLEDGE_LAB_COMPLETE' })
