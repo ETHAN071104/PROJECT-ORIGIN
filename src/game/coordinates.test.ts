@@ -4,6 +4,7 @@ import { calculateScaledStage, clientToLogicalPoint, GAME_HEIGHT, GAME_WIDTH } f
 describe('fixed logical game coordinates', () => {
   it.each([
     [1920, 1080, 2],
+    [1024, 576, 576 / 540],
     [1366, 768, 768 / 540],
     [844, 390, 390 / 540],
     [740, 360, 360 / 540],

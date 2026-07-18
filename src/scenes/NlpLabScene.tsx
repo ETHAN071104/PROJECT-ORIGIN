@@ -37,6 +37,7 @@ function NlpStageShell({
   onExit: () => void
   children: ReactNode
 }) {
+  const [hintDismissed, setHintDismissed] = useState(false)
   return (
     <div className="scene nlp-stage-scene lab-nlp">
       <div className="nlp-archive-shelves" aria-hidden="true"><i /><i /><i /><i /><b /><b /></div>
@@ -50,11 +51,12 @@ function NlpStageShell({
         </div>
         <PixelButton variant="secondary" className="nlp-exit-button" onClick={onExit}>Exit Lab</PixelButton>
       </header>
-      {wrongAttempts >= 2 && (
+      {wrongAttempts >= 2 && !hintDismissed && (
         <aside className="lexi-hint" role="status">
           <div className="lexi-hint-face" aria-hidden="true"><i /><b /><b /></div>
           <strong>LEXI-7</strong>
           <span>{NLP_HINTS[stage]}</span>
+          <button type="button" className="mentor-hint-close" aria-label="Close LEXI-7 hint" onClick={() => setHintDismissed(true)}>×</button>
         </aside>
       )}
       {children}

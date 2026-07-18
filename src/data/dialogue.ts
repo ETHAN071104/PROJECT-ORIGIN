@@ -85,11 +85,34 @@ export const dialogueScripts: Record<string, DialogueLine[]> = {
       text: 'Context is the chapter everyone forgets to index. Open the language archive.',
     },
   ],
+  'dl-intro': [
+    {
+      speaker: 'NODE-9',
+      portrait: 'mentor',
+      text: 'Three foundation signals detected. The sealed network can finally accept a student.',
+    },
+    {
+      speaker: 'NODE-9',
+      portrait: 'mentor',
+      text: 'Deep learning builds useful representations through connected layers of artificial neurons.',
+    },
+    {
+      speaker: '{{player}}',
+      portrait: 'player',
+      text: 'So one small signal can become a larger understanding?',
+      choices: ['Connect the network', 'Power the neural core'],
+    },
+    {
+      speaker: 'NODE-9',
+      portrait: 'mentor',
+      text: 'If the paths, strengths, and updates are tuned together. We begin with the connections.',
+    },
+  ],
   'research-locked': [
     {
       speaker: 'ACADEMY CORE',
       portrait: 'system',
-      text: 'RESEARCH LAB SEALED. Three foundation lab signals are required.',
+      text: 'RESEARCH LAB SEALED. The Deep Learning neural core is required.',
     },
     {
       speaker: '{{player}}',
@@ -101,7 +124,7 @@ export const dialogueScripts: Record<string, DialogueLine[]> = {
     {
       speaker: 'ACADEMY CORE',
       portrait: 'system',
-      text: 'FOUNDATION SIGNALS SYNCHRONIZED. RESEARCH LAB POWERED. ACCESS SEQUENCE AWAITS PHASE 5.',
+      text: 'FOUR ACADEMY SIGNALS SYNCHRONIZED. RESEARCH LAB POWERED. ACCESS SEQUENCE AWAITS PHASE 5.',
     },
     {
       speaker: '{{player}}',

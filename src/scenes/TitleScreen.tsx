@@ -57,7 +57,7 @@ export function TitleScreen() {
             <dl>
               <div><dt>PROJECT</dt><dd>PROJECT ORIGIN</dd></div>
               <div><dt>FORMAT</dt><dd>2D PIXEL RPG</dd></div>
-              <div><dt>CURRICULUM</dt><dd>CV / ML / NLP</dd></div>
+              <div><dt>CURRICULUM</dt><dd>CV / ML / NLP / DL</dd></div>
               <div><dt>INPUT</dt><dd>KEYBOARD / TOUCH</dd></div>
             </dl>
             <p className="developer-copy">A story-driven AI academy built for the browser. Restore the foundation labs and uncover the sealed Research facility.</p>

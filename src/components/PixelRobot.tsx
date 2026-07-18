@@ -7,12 +7,13 @@ interface PixelRobotProps {
   visionUpgraded?: boolean
   learningUpgraded?: boolean
   communicationUpgraded?: boolean
+  deepLearningUpgraded?: boolean
   className?: string
 }
 
-export function PixelRobot({ direction = 'down', walking = false, awakened = true, visionUpgraded = false, learningUpgraded = false, communicationUpgraded = false, className = '' }: PixelRobotProps) {
+export function PixelRobot({ direction = 'down', walking = false, awakened = true, visionUpgraded = false, learningUpgraded = false, communicationUpgraded = false, deepLearningUpgraded = false, className = '' }: PixelRobotProps) {
   return (
-    <div className={`pixel-robot face-${direction} ${walking ? 'is-walking' : ''} ${visionUpgraded ? 'has-vision-upgrade' : ''} ${learningUpgraded ? 'has-learning-upgrade' : ''} ${communicationUpgraded ? 'has-communication-upgrade' : ''} ${className}`} aria-label="Small robot">
+    <div className={`pixel-robot face-${direction} ${walking ? 'is-walking' : ''} ${visionUpgraded ? 'has-vision-upgrade' : ''} ${learningUpgraded ? 'has-learning-upgrade' : ''} ${communicationUpgraded ? 'has-communication-upgrade' : ''} ${deepLearningUpgraded ? 'has-dl-upgrade' : ''} ${className}`} aria-label="Small robot">
       <div className="robot-antenna" />
       <div className="robot-head">
         <span className={awakened ? 'eye lit' : 'eye'} />

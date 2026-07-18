@@ -17,7 +17,7 @@
 .nlp-stage-title strong { display: block; margin-top: 3px; color: #f7efff; font-size: 17px; }
 .nlp-stage-progress { display: flex; gap: 8px; }.nlp-stage-progress i { width: 31px; height: 8px; background: #312642; border: 2px solid #5d4c74; }.nlp-stage-progress i.is-active { background: var(--nlp-violet); border-color: var(--nlp-bright); box-shadow: 0 0 8px #a15fd0; }
 .nlp-exit-button { justify-self: end; min-width: 118px; padding: 8px 12px; font-size: 10px; }
-.lexi-hint { position: absolute; z-index: 20; right: 164px; top: 71px; width: 430px; min-height: 50px; display: grid; grid-template-columns: 42px 92px 1fr; align-items: center; gap: 8px; padding: 6px 10px; color: #ddd2eb; background: #171027; border: 2px solid #a56ed0; box-shadow: 5px 5px 0 #080411; }
+.lexi-hint { position: absolute; z-index: 20; right: 164px; top: 71px; width: 430px; min-height: 50px; display: grid; grid-template-columns: 42px 92px 1fr; align-items: center; gap: 8px; padding: 6px 36px 6px 10px; color: #ddd2eb; background: #171027; border: 2px solid #a56ed0; box-shadow: 5px 5px 0 #080411; }
 .lexi-hint strong { color: #e8b8ff; font-size: 10px; }.lexi-hint span { font-size: 10px; line-height: 1.25; }
 .lexi-hint-face { position: relative; width: 34px; height: 34px; background: #7a5b91; border: 3px solid #2b1b3f; }.lexi-hint-face i { position: absolute; left: 6px; top: 8px; width: 6px; height: 6px; background: #f1caff; box-shadow: 13px 0 #f1caff; }.lexi-hint-face b { position: absolute; bottom: 5px; width: 8px; height: 3px; background: #d482fb; }.lexi-hint-face b:nth-child(2) { left: 7px; }.lexi-hint-face b:last-child { right: 6px; }
 

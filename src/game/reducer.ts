@@ -1,5 +1,5 @@
 import { emptySave } from './storage'
-import type { GameAction, GameState, SaveData } from './types'
+import type { GameAction, GameState, HubSpawnId, SaveData, WorldMapId, WorldSpawnId } from './types'
 
 export function createInitialState(stored: SaveData | null): GameState {
   return {
@@ -9,11 +9,23 @@ export function createInitialState(stored: SaveData | null): GameState {
     dialogueKey: null,
     hasStoredSave: Boolean(stored?.introCompleted && stored.playerName),
     hubSpawn: 'hub-default',
+    historySpawn: 'history-from-academy',
+    researchSpawn: 'research-from-history',
   }
 }
 
-const allLabsComplete = (save: SaveData) =>
+const foundationsComplete = (save: SaveData) =>
   save.completedLabs.cv && save.completedLabs.ml && save.completedLabs.nlp
+
+const allLabsComplete = (save: SaveData) =>
+  foundationsComplete(save) && save.completedLabs.dl
+
+function atWorldLocation(save: SaveData, lastMap: WorldMapId, lastSpawn: WorldSpawnId, updates: Partial<SaveData['worldProgress']> = {}): SaveData {
+  return {
+    ...save,
+    worldProgress: { ...save.worldProgress, ...updates, lastMap, lastSpawn },
+  }
+}
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
@@ -24,9 +36,36 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         save: emptySave(state.save.audioEnabled),
       }
     case 'CONTINUE_GAME':
-      return state.hasStoredSave
-        ? { ...state, screen: 'HUB', currentLab: null, dialogueKey: null, hubSpawn: 'hub-default' }
-        : state
+      if (!state.hasStoredSave) return state
+      if (allLabsComplete(state.save) && state.save.worldProgress.lastMap === 'history') {
+        return {
+          ...state,
+          screen: 'HISTORY_MAP',
+          currentLab: null,
+          dialogueKey: null,
+          historySpawn: state.save.worldProgress.lastSpawn === 'history-from-research'
+            ? 'history-from-research'
+            : 'history-from-academy',
+        }
+      }
+      if (allLabsComplete(state.save) && state.save.worldProgress.lastMap === 'research') {
+        return {
+          ...state,
+          screen: 'RESEARCH_MAP',
+          currentLab: null,
+          dialogueKey: null,
+          researchSpawn: 'research-from-history',
+        }
+      }
+      return {
+        ...state,
+        screen: 'HUB',
+        currentLab: null,
+        dialogueKey: null,
+        hubSpawn: state.save.worldProgress.lastSpawn.startsWith('hub-')
+          ? state.save.worldProgress.lastSpawn as HubSpawnId
+          : 'hub-default',
+      }
     case 'INTRO_COMPLETE':
       return {
         ...state,
@@ -45,7 +84,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
     }
     case 'ENTER_LAB':
-      return { ...state, screen: 'LAB_INTERIOR', currentLab: action.lab }
+      if (action.lab === 'dl' && !foundationsComplete(state.save)) return state
+      return {
+        ...state,
+        screen: 'LAB_INTERIOR',
+        currentLab: action.lab,
+        save: atWorldLocation(state.save, 'hub', state.hubSpawn),
+      }
     case 'LEAVE_LAB':
       return {
         ...state,
@@ -53,6 +98,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         currentLab: null,
         dialogueKey: null,
         hubSpawn: state.currentLab ? `hub-from-${state.currentLab}` : state.hubSpawn,
+        save: atWorldLocation(
+          state.save,
+          'hub',
+          state.currentLab ? `hub-from-${state.currentLab}` : state.hubSpawn,
+        ),
       }
     case 'START_DIALOGUE':
       return { ...state, screen: 'DIALOGUE', dialogueKey: action.key }
@@ -185,19 +235,80 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
     case 'FINISH_NLP_LAB':
       return state.currentLab === 'nlp' ? { ...state, screen: 'LAB_COMPLETE' } : state
+    case 'RECORD_DL_STAGE':
+      if (state.currentLab !== 'dl' || !foundationsComplete(state.save)) return state
+      return {
+        ...state,
+        hasStoredSave: true,
+        save: {
+          ...state.save,
+          stageProgress: {
+            ...state.save.stageProgress,
+            dl: Math.max(state.save.stageProgress.dl, action.stage),
+          },
+        },
+      }
+    case 'COMPLETE_DL_LAB': {
+      if (state.currentLab !== 'dl' || !foundationsComplete(state.save)) return state
+      const achievements = state.save.achievements.includes('NEURAL_CORE_ONLINE')
+        ? [...state.save.achievements]
+        : [...state.save.achievements, 'NEURAL_CORE_ONLINE']
+      return {
+        ...state,
+        hasStoredSave: true,
+        save: {
+          ...state.save,
+          completedLabs: { ...state.save.completedLabs, dl: true },
+          stageProgress: { ...state.save.stageProgress, dl: 4 },
+          achievements,
+        },
+      }
+    }
+    case 'FINISH_DL_LAB':
+      return state.currentLab === 'dl' && state.save.completedLabs.dl
+        ? { ...state, screen: 'LAB_COMPLETE' }
+        : state
     case 'ACKNOWLEDGE_LAB_COMPLETE':
       return {
         ...state,
         screen: 'HUB',
         currentLab: null,
         hubSpawn: state.currentLab ? `hub-from-${state.currentLab}` : state.hubSpawn,
+        save: atWorldLocation(
+          state.save,
+          'hub',
+          state.currentLab ? `hub-from-${state.currentLab}` : state.hubSpawn,
+        ),
       }
     case 'ENTER_RESEARCH_ROUTE':
+      if (!allLabsComplete(state.save)) return state
+      return {
+        ...state,
+        screen: 'HISTORY_MAP',
+        currentLab: null,
+        dialogueKey: null,
+        historySpawn: 'history-from-academy',
+        save: atWorldLocation(state.save, 'history', 'history-from-academy', { hallVisited: true }),
+      }
+    case 'ENTER_RESEARCH_COMPLEX':
+      if (!allLabsComplete(state.save) || state.screen !== 'HISTORY_MAP') return state
       return {
         ...state,
         screen: 'RESEARCH_MAP',
         currentLab: null,
         dialogueKey: null,
+        researchSpawn: 'research-from-history',
+        save: atWorldLocation(state.save, 'research', 'research-from-history', { researchVisited: true }),
+      }
+    case 'RETURN_TO_HISTORY':
+      if (!allLabsComplete(state.save) || state.screen !== 'RESEARCH_MAP') return state
+      return {
+        ...state,
+        screen: 'HISTORY_MAP',
+        currentLab: null,
+        dialogueKey: null,
+        historySpawn: 'history-from-research',
+        save: atWorldLocation(state.save, 'history', 'history-from-research', { hallVisited: true }),
       }
     case 'RETURN_TO_HUB':
       return {
@@ -205,14 +316,46 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         screen: 'HUB',
         currentLab: null,
         dialogueKey: null,
-        hubSpawn: 'hub-from-east-gate',
+        hubSpawn: 'hub-from-history',
+        save: atWorldLocation(state.save, 'hub', 'hub-from-history'),
+      }
+    case 'RETURN_TO_TITLE':
+      return {
+        ...state,
+        screen: 'TITLE',
+        currentLab: null,
+        dialogueKey: null,
+        hubSpawn: 'hub-default',
       }
     case 'OPEN_RESEARCH':
+      if (state.screen !== 'RESEARCH_MAP' || !allLabsComplete(state.save)) return state
       return {
         ...state,
         screen: 'DIALOGUE',
         currentLab: null,
         dialogueKey: allLabsComplete(state.save) ? 'research-powered' : 'research-locked',
+      }
+    case 'READ_HISTORY_ENTRY': {
+      if (state.save.worldProgress.readExhibitIds.includes(action.id)) return state
+      return {
+        ...state,
+        save: {
+          ...state.save,
+          worldProgress: {
+            ...state.save.worldProgress,
+            readExhibitIds: [...state.save.worldProgress.readExhibitIds, action.id],
+          },
+        },
+      }
+    }
+    case 'REACH_FINAL_GATE':
+      if (state.screen !== 'RESEARCH_MAP' || !allLabsComplete(state.save)) return state
+      return {
+        ...state,
+        save: {
+          ...state.save,
+          worldProgress: { ...state.save.worldProgress, finalGateReached: true },
+        },
       }
     case 'TOGGLE_AUDIO':
       return { ...state, save: { ...state.save, audioEnabled: !state.save.audioEnabled } }
@@ -221,4 +364,4 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
-export { allLabsComplete }
+export { allLabsComplete, foundationsComplete }

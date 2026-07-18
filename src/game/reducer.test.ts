@@ -65,29 +65,134 @@ describe('Project Origin navigation state machine', () => {
     expect(state.hubSpawn).toBe('hub-from-nlp')
 
     state = gameReducer(state, { type: 'ENTER_RESEARCH_ROUTE' })
-    expect(state.screen).toBe('RESEARCH_MAP')
-    state = gameReducer(state, { type: 'OPEN_RESEARCH' })
-    expect(state.screen).toBe('DIALOGUE')
-    expect(state.dialogueKey).toBe('research-powered')
+    expect(state.screen).toBe('HUB')
+
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'dl' })
+    expect(state.screen).toBe('LAB_INTERIOR')
+    state = gameReducer(state, { type: 'START_DIALOGUE', key: 'dl-intro' })
     state = gameReducer(state, { type: 'DIALOGUE_COMPLETE' })
+    state = gameReducer(state, { type: 'RECORD_DL_STAGE', stage: 1 })
+    state = gameReducer(state, { type: 'RECORD_DL_STAGE', stage: 2 })
+    state = gameReducer(state, { type: 'RECORD_DL_STAGE', stage: 3 })
+    expect(state.save.stageProgress.dl).toBe(3)
+    state = gameReducer(state, { type: 'COMPLETE_DL_LAB' })
+    expect(state.save.stageProgress.dl).toBe(4)
+    expect(state.save.completedLabs.dl).toBe(true)
+    expect(state.save.achievements).toContain('NEURAL_CORE_ONLINE')
+    state = gameReducer(state, { type: 'FINISH_DL_LAB' })
+    expect(state.screen).toBe('LAB_COMPLETE')
+    state = gameReducer(state, { type: 'ACKNOWLEDGE_LAB_COMPLETE' })
+    expect(state.hubSpawn).toBe('hub-from-dl')
+
+    state = gameReducer(state, { type: 'ENTER_RESEARCH_ROUTE' })
+    expect(state.screen).toBe('HISTORY_MAP')
+    expect(state.historySpawn).toBe('history-from-academy')
+    expect(state.save.worldProgress.hallVisited).toBe(true)
+    state = gameReducer(state, { type: 'READ_HISTORY_ENTRY', id: 'hall-imitation-game-1950' })
+    expect(state.save.worldProgress.readExhibitIds).toContain('hall-imitation-game-1950')
+    state = gameReducer(state, { type: 'ENTER_RESEARCH_COMPLEX' })
     expect(state.screen).toBe('RESEARCH_MAP')
+    expect(state.researchSpawn).toBe('research-from-history')
+    expect(state.save.worldProgress.researchVisited).toBe(true)
+    state = gameReducer(state, { type: 'REACH_FINAL_GATE' })
+    expect(state.screen).toBe('RESEARCH_MAP')
+    expect(state.save.worldProgress.finalGateReached).toBe(true)
+    state = gameReducer(state, { type: 'RETURN_TO_HISTORY' })
+    expect(state.screen).toBe('HISTORY_MAP')
+    expect(state.historySpawn).toBe('history-from-research')
     state = gameReducer(state, { type: 'RETURN_TO_HUB' })
     expect(state.screen).toBe('HUB')
-    expect(state.hubSpawn).toBe('hub-from-east-gate')
+    expect(state.hubSpawn).toBe('hub-from-history')
   })
 
-  it('keeps research locked before all labs are complete', () => {
+  it('keeps the East Gate route locked until the Deep Learning Lab is complete', () => {
     let state = createInitialState(null)
+    state = { ...state, screen: 'HUB' }
     state = gameReducer(state, { type: 'ENTER_RESEARCH_ROUTE' })
-    expect(state.screen).toBe('RESEARCH_MAP')
-    state = gameReducer(state, { type: 'OPEN_RESEARCH' })
-    expect(state.screen).toBe('DIALOGUE')
-    expect(state.dialogueKey).toBe('research-locked')
-    state = gameReducer(state, { type: 'DIALOGUE_COMPLETE' })
-    expect(state.screen).toBe('RESEARCH_MAP')
-    state = gameReducer(state, { type: 'RETURN_TO_HUB' })
     expect(state.screen).toBe('HUB')
-    expect(state.hubSpawn).toBe('hub-from-east-gate')
+    state = gameReducer(state, { type: 'ENTER_RESEARCH_COMPLEX' })
+    expect(state.screen).toBe('HUB')
+    state = gameReducer(state, { type: 'OPEN_RESEARCH' })
+    expect(state.screen).toBe('HUB')
+  })
+
+  it('does not trust an invalid DL-only save to open the East Gate', () => {
+    let state = createInitialState(null)
+    state = { ...state, screen: 'HUB', save: { ...state.save, completedLabs: { cv: false, ml: false, nlp: false, dl: true } } }
+    state = gameReducer(state, { type: 'ENTER_RESEARCH_ROUTE' })
+    expect(state.screen).toBe('HUB')
+  })
+
+  it('requires the Hall route before entering Research and never auto-starts an ending at the Final Gate', () => {
+    let state = createInitialState(null)
+    state = {
+      ...state,
+      screen: 'HUB',
+      save: { ...state.save, completedLabs: { cv: true, ml: true, nlp: true, dl: true } },
+    }
+
+    state = gameReducer(state, { type: 'ENTER_RESEARCH_COMPLEX' })
+    expect(state.screen).toBe('HUB')
+    state = gameReducer(state, { type: 'ENTER_RESEARCH_ROUTE' })
+    expect(state.screen).toBe('HISTORY_MAP')
+    state = gameReducer(state, { type: 'ENTER_RESEARCH_COMPLEX' })
+    expect(state.screen).toBe('RESEARCH_MAP')
+    state = gameReducer(state, { type: 'REACH_FINAL_GATE' })
+
+    expect(state.screen).toBe('RESEARCH_MAP')
+    expect(state.save.worldProgress.finalGateReached).toBe(true)
+  })
+
+  it('continues on the last unlocked world map with its safe named spawn', () => {
+    let state = createInitialState(null)
+    state = {
+      ...state,
+      hasStoredSave: true,
+      save: {
+        ...state.save,
+        playerName: 'ORI',
+        introCompleted: true,
+        completedLabs: { cv: true, ml: true, nlp: true, dl: true },
+        worldProgress: {
+          ...state.save.worldProgress,
+          hallVisited: true,
+          lastMap: 'history',
+          lastSpawn: 'history-from-research',
+        },
+      },
+    }
+
+    state = gameReducer(state, { type: 'CONTINUE_GAME' })
+    expect(state.screen).toBe('HISTORY_MAP')
+    expect(state.historySpawn).toBe('history-from-research')
+  })
+
+  it('returns from the Hub to the title without losing the current save', () => {
+    let state = createInitialState(null)
+    state = gameReducer(state, { type: 'NEW_GAME' })
+    state = gameReducer(state, { type: 'INTRO_COMPLETE' })
+    state = gameReducer(state, { type: 'SET_NAME', name: 'ORI' })
+    const save = state.save
+
+    state = gameReducer(state, { type: 'RETURN_TO_TITLE' })
+
+    expect(state.screen).toBe('TITLE')
+    expect(state.currentLab).toBeNull()
+    expect(state.save).toBe(save)
+    expect(state.hasStoredSave).toBe(true)
+  })
+
+  it('keeps DL sealed until all three foundation labs are complete', () => {
+    let state = createInitialState(null)
+    state = { ...state, screen: 'HUB' }
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'dl' })
+    expect(state.screen).toBe('HUB')
+    expect(state.currentLab).toBeNull()
+
+    state = { ...state, save: { ...state.save, completedLabs: { ...state.save.completedLabs, cv: true, ml: true, nlp: true } } }
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'dl' })
+    expect(state.screen).toBe('LAB_INTERIOR')
+    expect(state.currentLab).toBe('dl')
   })
 
   it.each(['cv', 'ml', 'nlp'] as const)('returns an early %s lab exit to its named door spawn', (lab) => {
@@ -131,6 +236,17 @@ describe('Project Origin navigation state machine', () => {
     state = gameReducer(state, { type: 'RECORD_NLP_STAGE', stage: 3 })
     state = gameReducer(state, { type: 'RECORD_NLP_STAGE', stage: 1 })
     expect(state.save.stageProgress.nlp).toBe(3)
+  })
+
+  it('never moves DL progress backwards and ignores DL actions while locked or outside DL', () => {
+    let state = createInitialState(null)
+    state = gameReducer(state, { type: 'RECORD_DL_STAGE', stage: 2 })
+    expect(state.save.stageProgress.dl).toBe(0)
+    state = { ...state, save: { ...state.save, completedLabs: { cv: true, ml: true, nlp: true, dl: false } } }
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'dl' })
+    state = gameReducer(state, { type: 'RECORD_DL_STAGE', stage: 3 })
+    state = gameReducer(state, { type: 'RECORD_DL_STAGE', stage: 1 })
+    expect(state.save.stageProgress.dl).toBe(3)
   })
 
   it('awards AI Awakened no matter which foundation lab is completed last', () => {

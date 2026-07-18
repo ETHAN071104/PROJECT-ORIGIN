@@ -7,6 +7,7 @@ const summaries = {
   cv: 'Machines can use labelled visual examples to detect useful features and classify what they see.',
   ml: 'Machine learning finds patterns in examples, then uses those patterns to make a prediction about new data.',
   nlp: 'Language systems connect words, structure, and context to estimate what a person means.',
+  dl: 'Deep learning combines connected layers, tuned signals, and iterative optimization to learn useful representations from data.',
 }
 
 export function LabCompleteScene() {
@@ -17,26 +18,31 @@ export function LabCompleteScene() {
     ? 'MACHINES_FIRST_SIGHT'
     : state.currentLab === 'ml'
       ? 'PATTERN_FINDER'
-      : 'LANGUAGE_DECODER'
+      : state.currentLab === 'nlp'
+        ? 'LANGUAGE_DECODER'
+        : 'NEURAL_CORE_ONLINE'
   const achievementName = state.currentLab === 'cv'
     ? "Machine's First Sight"
     : state.currentLab === 'ml'
       ? 'Pattern Finder'
-      : 'Language Decoder'
+      : state.currentLab === 'nlp'
+        ? 'Language Decoder'
+        : 'Neural Core Online'
   const showLabAchievement = state.save.achievements.includes(achievementId)
-  const showAwakened = state.save.achievements.includes('AI_AWAKENED')
+  const showAwakened = state.currentLab !== 'dl' && state.save.achievements.includes('AI_AWAKENED')
 
   return (
     <div className={`scene complete-scene ${lab.roomClass}`}>
       <div className="complete-burst" aria-hidden="true"><i /><i /><i /><i /></div>
       <div className="complete-panel">
         <div className="signal-glyph"><span>{lab.shortName}</span></div>
-        <p>FOUNDATION SIGNAL ACQUIRED</p>
+        <p>{state.currentLab === 'dl' ? 'NEURAL SIGNAL ACQUIRED' : 'FOUNDATION SIGNAL ACQUIRED'}</p>
         <h2>{lab.title} Lab Complete</h2>
         <div className="mentor-explanation">
           <strong>{lab.mentor} // FIELD NOTE</strong>
           <p>{summaries[state.currentLab]}</p>
         </div>
+        {state.currentLab === 'dl' && <div className="east-gate-unlocked" role="status">EAST GATE UNLOCKED</div>}
         {(showLabAchievement || showAwakened) && (
           <div className="achievement-stack">
             {showLabAchievement && (

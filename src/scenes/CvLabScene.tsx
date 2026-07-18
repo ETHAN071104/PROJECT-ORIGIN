@@ -95,6 +95,7 @@ function CvStageShell({
   onExit: () => void
   children: ReactNode
 }) {
+  const [hintDismissed, setHintDismissed] = useState(false)
   return (
     <div className="scene cv-stage-scene lab-cv">
       <header className="cv-stage-hud">
@@ -107,10 +108,11 @@ function CvStageShell({
         </div>
         <PixelButton variant="secondary" className="cv-exit-button" onClick={onExit}>Exit Lab</PixelButton>
       </header>
-      {wrongAttempts >= 2 && (
+      {wrongAttempts >= 2 && !hintDismissed && (
         <aside className="lens-hint" role="status">
           <strong>LENS-01</strong>
           <span>{CV_HINTS[stage]}</span>
+          <button type="button" className="mentor-hint-close" aria-label="Close LENS-01 hint" onClick={() => setHintDismissed(true)}>×</button>
         </aside>
       )}
       {children}

@@ -11,7 +11,7 @@ export function DialogueScene() {
   const [lineIndex, setLineIndex] = useState(0)
   const [visibleCount, setVisibleCount] = useState(0)
   const line = script[lineIndex]
-  const lab = state.currentLab ?? (state.dialogueKey?.startsWith('cv') ? 'cv' : state.dialogueKey?.startsWith('ml') ? 'ml' : 'nlp')
+  const lab = state.currentLab ?? (state.dialogueKey?.startsWith('cv') ? 'cv' : state.dialogueKey?.startsWith('ml') ? 'ml' : state.dialogueKey?.startsWith('dl') ? 'dl' : 'nlp')
   const text = useMemo(() => line?.text.replaceAll('{{player}}', state.save.playerName) ?? '', [line, state.save.playerName])
   const speaker = line?.speaker.replaceAll('{{player}}', state.save.playerName) ?? ''
   const complete = visibleCount >= text.length
@@ -62,7 +62,7 @@ export function DialogueScene() {
       </div>
       <div className="dialogue-portraits">
         <Portrait type={line.portrait === 'system' ? 'system' : 'mentor'} mentor={lab} active={mentorSpeaking || line.portrait === 'system'} />
-        <Portrait type="player" active={playerSpeaking} visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} communicationUpgraded={state.save.completedLabs.nlp} />
+        <Portrait type="player" active={playerSpeaking} visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} communicationUpgraded={state.save.completedLabs.nlp} deepLearningUpgraded={state.save.completedLabs.dl} />
       </div>
       <div className="dialogue-box" onClick={advance}>
         <div className="speaker-name">{speaker}</div>

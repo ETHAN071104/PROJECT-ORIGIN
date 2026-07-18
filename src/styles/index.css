@@ -31,6 +31,9 @@ html, body, #root {
 button, input { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
+.mentor-hint-close { position: absolute; right: 5px; top: 5px; width: 22px; height: 22px; display: grid; place-items: center; padding: 0; color: #eef2f3; background: #303653; border: 2px solid #76809a; box-shadow: 2px 2px #050611; cursor: pointer; font-size: 15px; font-weight: 900; line-height: 1; }
+.mentor-hint-close:hover, .mentor-hint-close:focus-visible { color: #090b19; background: var(--cyan-pale); border-color: #fff; outline: 2px solid #fff; outline-offset: 2px; }
+
 .game-shell {
   width: 100vw;
   height: 100dvh;

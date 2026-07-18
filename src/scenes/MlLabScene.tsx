@@ -53,6 +53,7 @@ function MlStageShell({
   onExit: () => void
   children: ReactNode
 }) {
+  const [hintDismissed, setHintDismissed] = useState(false)
   return (
     <div className="scene ml-stage-scene lab-ml">
       <header className="ml-stage-hud">
@@ -65,11 +66,12 @@ function MlStageShell({
         </div>
         <PixelButton variant="secondary" className="ml-exit-button" onClick={onExit}>Exit Lab</PixelButton>
       </header>
-      {wrongAttempts >= 2 && (
+      {wrongAttempts >= 2 && !hintDismissed && (
         <aside className="pattern-hint" role="status">
           <div className="pattern-hint-face" aria-hidden="true"><i /><i /><b /></div>
           <strong>PROFESSOR PATTERN</strong>
           <span>{ML_HINTS[stage]}</span>
+          <button type="button" className="mentor-hint-close" aria-label="Close Professor Pattern hint" onClick={() => setHintDismissed(true)}>×</button>
         </aside>
       )}
       {children}
@@ -500,7 +502,7 @@ function FactoryBossStage({ onComplete, onFinish, onExit }: { onComplete: () => 
         <section className="factory-story" role="dialog" aria-label="Production mark memory">
           <Portrait type="mentor" mentor="ml" active={storyLine === 1} />
           <div><span>{storyLine === 0 ? state.save.playerName : 'PROFESSOR PATTERN'}</span><p>{storyLine === 0 ? 'I have seen this production mark before.' : 'Then your past may contain more patterns than your memory.'}</p><PixelButton onClick={advanceStory}>Continue</PixelButton></div>
-          <Portrait type="player" active={storyLine === 0} visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} />
+          <Portrait type="player" active={storyLine === 0} visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} communicationUpgraded={state.save.completedLabs.nlp} deepLearningUpgraded={state.save.completedLabs.dl} />
         </section>
       )}
       {phase === 'TRAINED' && (

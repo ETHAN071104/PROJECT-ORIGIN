@@ -38,4 +38,13 @@ export const labs: Record<LabId, LabDefinition> = {
     roomClass: 'lab-nlp',
     learningTeaser: 'Help a machine connect words with meaning.',
   },
+  dl: {
+    id: 'dl',
+    shortName: 'DL',
+    title: 'Deep Learning',
+    mentor: 'NODE-9',
+    color: '#9e8cff',
+    roomClass: 'lab-dl',
+    learningTeaser: 'Build layers that turn small signals into learned representations.',
+  },
 }

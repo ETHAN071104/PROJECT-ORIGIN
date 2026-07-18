@@ -4,7 +4,7 @@ import { PixelRobot } from '../components/PixelRobot'
 import { VirtualControls } from '../components/VirtualControls'
 import { HUB_BOUNDS, HUB_EAST_TRANSITION_X, HUB_SPAWNS, HUB_TARGETS, type HubTarget } from '../data/maps'
 import { useGame } from '../game/GameContext'
-import { allLabsComplete } from '../game/reducer'
+import { allLabsComplete, foundationsComplete } from '../game/reducer'
 import type { LabId, Point } from '../game/types'
 import { usePlayerMovement } from '../hooks/usePlayerMovement'
 import { useVoiceExpression } from '../hooks/useVoiceExpression'
@@ -20,7 +20,9 @@ export function HubScene() {
   const dayUnlocked = state.save.completedLabs.cv
   const learningRestored = state.save.completedLabs.ml
   const languageRestored = state.save.completedLabs.nlp
+  const dlOnline = foundationsComplete(state.save)
   const researchPowered = allLabsComplete(state.save)
+  const foundationStatus = `CV ${state.save.completedLabs.cv ? 'OK' : '--'} / ML ${state.save.completedLabs.ml ? 'OK' : '--'} / NLP ${state.save.completedLabs.nlp ? 'OK' : '--'}`
   const defaultPrompt = dayUnlocked ? 'Explore the awakened academy' : 'The academy is quiet. Follow the lit paths.'
   const [prompt, setPrompt] = useState(defaultPrompt)
   const transitioned = useRef(false)
@@ -29,26 +31,32 @@ export function HubScene() {
 
   const enterResearchRoute = useCallback(() => {
     if (transitioned.current) return
+    if (!researchPowered) {
+      playTone(state.save.audioEnabled, 'incorrect')
+      setPrompt('EAST GATE REQUIRES THE DEEP LEARNING MODULE')
+      return
+    }
     transitioned.current = true
     playTone(state.save.audioEnabled, 'confirm')
     dispatch({ type: 'ENTER_RESEARCH_ROUTE' })
-  }, [dispatch, state.save.audioEnabled])
+  }, [dispatch, researchPowered, state.save.audioEnabled])
 
   const updatePrompt = useCallback((position: Point) => {
     if (position.x >= HUB_EAST_TRANSITION_X && position.y >= 238 && position.y <= 356) {
-      enterResearchRoute()
+      if (researchPowered) enterResearchRoute()
+      else setPrompt('EAST GATE REQUIRES THE DEEP LEARNING MODULE')
       return
     }
 
     const target = nearestTarget(position)
     let nextPrompt = defaultPrompt
     if (distance(position, target.position) <= target.interactionRadius) {
-      if (target.id === 'east-gate') nextPrompt = researchPowered ? 'East route online — press E to travel' : 'Press E to follow the silent east route'
-      else if (target.id === 'dl') nextPrompt = 'Deep Learning Lab is dormant'
+      if (target.id === 'east-gate') nextPrompt = researchPowered ? 'East route online — press E to travel' : 'East Gate sealed — Deep Learning module required'
+      else if (target.id === 'dl') nextPrompt = dlOnline ? 'Press E to enter DL Lab' : `THREE FOUNDATIONAL MODULES REQUIRED — ${foundationStatus}`
       else nextPrompt = `Press E to enter ${target.id.toUpperCase()} Lab`
     }
     setPrompt((current) => current === nextPrompt ? current : nextPrompt)
-  }, [defaultPrompt, enterResearchRoute, researchPowered])
+  }, [defaultPrompt, dlOnline, enterResearchRoute, foundationStatus, researchPowered])
 
   const interact = useCallback((position: Point) => {
     const target = nearestTarget(position)
@@ -61,13 +69,18 @@ export function HubScene() {
       return
     }
     if (target.id === 'dl') {
-      playTone(state.save.audioEnabled, 'incorrect')
-      setPrompt('No signal. This lab has not awakened yet.')
+      if (dlOnline) {
+        playTone(state.save.audioEnabled, 'confirm')
+        dispatch({ type: 'ENTER_LAB', lab: 'dl' })
+      } else {
+        playTone(state.save.audioEnabled, 'incorrect')
+        setPrompt(`THREE FOUNDATIONAL MODULES REQUIRED — ${foundationStatus}`)
+      }
       return
     }
     playTone(state.save.audioEnabled)
     dispatch({ type: 'ENTER_LAB', lab: target.id })
-  }, [dispatch, enterResearchRoute, state.save.audioEnabled])
+  }, [dispatch, dlOnline, enterResearchRoute, foundationStatus, state.save.audioEnabled])
 
   const movement = usePlayerMovement({
     active: true,
@@ -91,9 +104,10 @@ export function HubScene() {
   return (
     <div className="scene hub-scene">
       <div className="scene-hud campus-hud">
+        <button type="button" className="hub-home-button" onClick={() => { playTone(state.save.audioEnabled, 'confirm'); dispatch({ type: 'RETURN_TO_TITLE' }) }}><i aria-hidden="true" />HOME</button>
         <div><span>UNIT</span><strong>{state.save.playerName}</strong></div>
         <div className="hub-title"><span>AI ACADEMY</span><strong>{dayUnlocked ? 'DAY CAMPUS' : 'NIGHT CAMPUS'}</strong></div>
-        <div><span>LAB SIGNALS</span><strong>{Object.values(state.save.completedLabs).filter(Boolean).length} / 3</strong></div>
+        <div><span>LAB SIGNALS</span><strong>{Object.values(state.save.completedLabs).filter(Boolean).length} / 4</strong></div>
       </div>
 
       <div className={mapClasses} aria-label={`${dayUnlocked ? 'Daytime' : 'Nighttime'} AI Academy campus map`}>
@@ -106,7 +120,9 @@ export function HubScene() {
         <CampusLabBuilding id="cv" label="CV" completed={state.save.completedLabs.cv} />
         <CampusLabBuilding id="ml" label="ML" completed={state.save.completedLabs.ml} />
         <CampusLabBuilding id="nlp" label="NLP" completed={state.save.completedLabs.nlp} />
-        <CampusLabBuilding id="dl" label="DL" completed={false} locked />
+        <CampusLabBuilding id="dl" label="DL" completed={state.save.completedLabs.dl} locked={!dlOnline} questAvailable={dlOnline && !state.save.completedLabs.dl} />
+
+        {dlOnline && !state.save.completedLabs.dl && <div className="dl-online-notice" role="status"><i />DEEP LEARNING LAB ONLINE</div>}
 
         <div className="origin-plaza" aria-label="ORIGIN academy emblem">
           <div className="origin-mark"><i /><i /><i /><i /><b>ORIGIN</b></div>
@@ -134,7 +150,7 @@ export function HubScene() {
 
         <div ref={movement.playerRef} className="player-on-map" style={movement.playerStyle} data-player-direction={movement.direction}>
           {voice.expression && <span key={voice.expression.id} className="voice-note-bubble">♪ {voice.expression.note}</span>}
-          <PixelRobot direction={movement.direction} walking={movement.walking} visionUpgraded={dayUnlocked} learningUpgraded={learningRestored} communicationUpgraded={languageRestored} />
+          <PixelRobot direction={movement.direction} walking={movement.walking} visionUpgraded={dayUnlocked} learningUpgraded={learningRestored} communicationUpgraded={languageRestored} deepLearningUpgraded={state.save.completedLabs.dl} />
         </div>
       </div>
 
@@ -152,15 +168,16 @@ export function HubScene() {
   )
 }
 
-function CampusLabBuilding({ id, label, completed, locked = false }: { id: LabId | 'dl'; label: string; completed: boolean; locked?: boolean }) {
+function CampusLabBuilding({ id, label, completed, locked = false, questAvailable = false }: { id: LabId; label: string; completed: boolean; locked?: boolean; questAvailable?: boolean }) {
   const fullName = id === 'cv' ? 'Computer Vision' : id === 'ml' ? 'Machine Learning' : id === 'nlp' ? 'Natural Language' : 'Deep Learning'
   return (
     <section className={`campus-lab campus-lab-${id} ${completed ? 'is-complete' : ''} ${locked ? 'is-locked' : ''}`} aria-label={`${fullName} Lab${completed ? ', restored' : locked ? ', dormant' : ''}`}>
+      {questAvailable && <span className="lab-quest-marker" aria-label="New lab task available">!</span>}
       <div className="campus-lab-roof"><span className="lab-symbol"><i /><i /><i /></span><b /></div>
       <div className="campus-lab-face">
         <i className="lab-window window-left" /><i className="lab-window window-right" />
         <span className="campus-lab-plaque">{label}</span>
-        <div className="campus-lab-door"><i />{locked && <span className="pixel-padlock" />}</div>
+        <div className="campus-lab-door"><i />{locked && <span className="pixel-padlock" />}{completed && <span className="lab-complete-check" aria-label="Lab complete">✓</span>}</div>
         <span className="lab-status-light" aria-hidden="true" />
       </div>
     </section>
