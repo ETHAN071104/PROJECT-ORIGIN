@@ -62,7 +62,7 @@ export function DialogueScene() {
       </div>
       <div className="dialogue-portraits">
         <Portrait type={line.portrait === 'system' ? 'system' : 'mentor'} mentor={lab} active={mentorSpeaking || line.portrait === 'system'} />
-        <Portrait type="player" active={playerSpeaking} visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} />
+        <Portrait type="player" active={playerSpeaking} visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} communicationUpgraded={state.save.completedLabs.nlp} />
       </div>
       <div className="dialogue-box" onClick={advance}>
         <div className="speaker-name">{speaker}</div>

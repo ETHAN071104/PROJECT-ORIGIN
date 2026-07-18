@@ -61,12 +61,17 @@ export const dialogueScripts: Record<string, DialogueLine[]> = {
     {
       speaker: 'LEXI-7',
       portrait: 'mentor',
-      text: 'Welcome. Please keep your voice down. The dictionaries are conjugating.',
+      text: 'Please keep your voice down. The dictionaries are conjugating.',
     },
     {
       speaker: 'LEXI-7',
       portrait: 'mentor',
-      text: 'I am LEXI-7. You will connect phrases to intent before we discuss how machines process language.',
+      text: 'Words are small. Meaning is not.',
+    },
+    {
+      speaker: 'LEXI-7',
+      portrait: 'mentor',
+      text: 'Let us teach this archive to follow language.',
     },
     {
       speaker: '{{player}}',
@@ -77,7 +82,7 @@ export const dialogueScripts: Record<string, DialogueLine[]> = {
     {
       speaker: 'LEXI-7',
       portrait: 'mentor',
-      text: 'Not quite. Context is the chapter everyone forgets to index. Open the language archive.',
+      text: 'Context is the chapter everyone forgets to index. Open the language archive.',
     },
   ],
   'research-locked': [
@@ -90,6 +95,18 @@ export const dialogueScripts: Record<string, DialogueLine[]> = {
       speaker: '{{player}}',
       portrait: 'player',
       text: 'Something behind that door feels familiar.',
+    },
+  ],
+  'research-powered': [
+    {
+      speaker: 'ACADEMY CORE',
+      portrait: 'system',
+      text: 'FOUNDATION SIGNALS SYNCHRONIZED. RESEARCH LAB POWERED. ACCESS SEQUENCE AWAITS PHASE 5.',
+    },
+    {
+      speaker: '{{player}}',
+      portrait: 'player',
+      text: 'The door is awake. It is still keeping its secrets.',
     },
   ],
 }

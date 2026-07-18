@@ -13,6 +13,18 @@ export function LabCompleteScene() {
   const { state, dispatch } = useGame()
   if (!state.currentLab) return null
   const lab = labs[state.currentLab]
+  const achievementId = state.currentLab === 'cv'
+    ? 'MACHINES_FIRST_SIGHT'
+    : state.currentLab === 'ml'
+      ? 'PATTERN_FINDER'
+      : 'LANGUAGE_DECODER'
+  const achievementName = state.currentLab === 'cv'
+    ? "Machine's First Sight"
+    : state.currentLab === 'ml'
+      ? 'Pattern Finder'
+      : 'Language Decoder'
+  const showLabAchievement = state.save.achievements.includes(achievementId)
+  const showAwakened = state.save.achievements.includes('AI_AWAKENED')
 
   return (
     <div className={`scene complete-scene ${lab.roomClass}`}>
@@ -25,16 +37,20 @@ export function LabCompleteScene() {
           <strong>{lab.mentor} // FIELD NOTE</strong>
           <p>{summaries[state.currentLab]}</p>
         </div>
-        {state.currentLab === 'cv' && state.save.achievements.includes('MACHINES_FIRST_SIGHT') && (
-          <div className="achievement-toast" role="status">
-            <span>ACHIEVEMENT UNLOCKED</span>
-            <strong>Machine's First Sight</strong>
-          </div>
-        )}
-        {state.currentLab === 'ml' && state.save.achievements.includes('PATTERN_FINDER') && (
-          <div className="achievement-toast achievement-ml" role="status">
-            <span>ACHIEVEMENT UNLOCKED</span>
-            <strong>Pattern Finder</strong>
+        {(showLabAchievement || showAwakened) && (
+          <div className="achievement-stack">
+            {showLabAchievement && (
+              <div className={`achievement-toast achievement-${state.currentLab}`} role="status">
+                <span>ACHIEVEMENT UNLOCKED</span>
+                <strong>{achievementName}</strong>
+              </div>
+            )}
+            {showAwakened && (
+              <div className="achievement-toast achievement-awakened" role="status">
+                <span>ALL FOUNDATION SIGNALS</span>
+                <strong>AI Awakened</strong>
+              </div>
+            )}
           </div>
         )}
         <PixelButton onClick={() => {

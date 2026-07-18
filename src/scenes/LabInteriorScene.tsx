@@ -58,7 +58,7 @@ export function LabInteriorScene() {
         <div className="lab-floor-grid" />
         <div className="lab-exit">EXIT</div>
         <div ref={movement.playerRef} className="player-in-lab" style={movement.playerStyle} data-player-direction={movement.direction}>
-          <PixelRobot direction={movement.direction} walking={movement.walking} visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} />
+          <PixelRobot direction={movement.direction} walking={movement.walking} visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} communicationUpgraded={state.save.completedLabs.nlp} />
         </div>
       </div>
       <div className="interaction-prompt"><span>E</span>{prompt}</div>

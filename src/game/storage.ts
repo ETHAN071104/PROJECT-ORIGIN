@@ -26,7 +26,7 @@ export function loadSave(): SaveData | null {
     }
     save.stageProgress.cv = Math.max(0, Math.min(4, Number(save.stageProgress.cv) || 0))
     save.stageProgress.ml = Math.max(0, Math.min(4, Number(save.stageProgress.ml) || 0))
-    save.stageProgress.nlp = Math.max(0, Number(save.stageProgress.nlp) || 0)
+    save.stageProgress.nlp = Math.max(0, Math.min(4, Number(save.stageProgress.nlp) || 0))
 
     // Saves created by the former one-button CV placeholder resume after the
     // recorded stage instead of incorrectly skipping the new complete lab.
@@ -38,6 +38,12 @@ export function loadSave(): SaveData | null {
     if (save.completedLabs.ml && !save.achievements.includes('PATTERN_FINDER')) {
       save.completedLabs.ml = false
       save.stageProgress.ml = 0
+    }
+    // The former NLP placeholder used the generic lab-complete marker. Resume
+    // those saves at the real language curriculum instead of skipping it.
+    if (save.completedLabs.nlp && !save.achievements.includes('LANGUAGE_DECODER')) {
+      save.completedLabs.nlp = false
+      save.stageProgress.nlp = 0
     }
     return save
   } catch {

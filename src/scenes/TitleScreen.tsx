@@ -1,42 +1,70 @@
+import { useEffect, useState } from 'react'
 import { PixelButton } from '../components/PixelButton'
-import { PixelRobot } from '../components/PixelRobot'
 import { playTone } from '../audio/audio'
 import { useGame } from '../game/GameContext'
 
 export function TitleScreen() {
   const { state, dispatch } = useGame()
+  const [detailsOpen, setDetailsOpen] = useState(false)
+
+  useEffect(() => {
+    if (!detailsOpen) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setDetailsOpen(false)
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [detailsOpen])
 
   const act = (action: 'NEW_GAME' | 'CONTINUE_GAME' | 'TOGGLE_AUDIO') => {
     playTone(state.save.audioEnabled, 'confirm')
     dispatch({ type: action })
   }
 
+  const openDetails = () => {
+    playTone(state.save.audioEnabled, 'confirm')
+    setDetailsOpen(true)
+  }
+
   return (
     <div className="scene title-scene">
-      <div className="title-stars stars-back" aria-hidden="true" />
-      <div className="academy-silhouette" aria-hidden="true">
-        <div className="academy-spire" />
-        <div className="academy-main"><span /><span /><span /></div>
-        <div className="academy-wing wing-left" />
-        <div className="academy-wing wing-right" />
-      </div>
+      <img className="title-backdrop" src="/assets/title-academy-archive.png" alt="" aria-hidden="true" fetchPriority="high" />
       <div className="title-lockup">
-        <div className="origin-mark" aria-hidden="true"><span /><i /></div>
+        <div className="title-origin-seal" aria-hidden="true"><span /><i /></div>
         <p className="title-kicker">AI ACADEMY ARCHIVE</p>
-        <h1>PROJECT <span>ORIGIN</span></h1>
+        <h1><span className="title-project">PROJECT</span><span className="title-origin">ORIGIN</span></h1>
         <p className="tagline">Every AI has an origin. This is yours.</p>
       </div>
-      <div className="title-robot" aria-hidden="true"><PixelRobot visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} /></div>
-      <div className="title-menu">
+      <nav className="title-menu" aria-label="Main menu">
         <PixelButton onClick={() => act('NEW_GAME')}>New Game</PixelButton>
-        {state.hasStoredSave && (
-          <PixelButton variant="secondary" onClick={() => act('CONTINUE_GAME')}>Continue</PixelButton>
-        )}
-        <PixelButton variant="secondary" onClick={() => act('TOGGLE_AUDIO')}>
+        <PixelButton variant="secondary" disabled={!state.hasStoredSave} onClick={() => act('CONTINUE_GAME')}>
+          Continue
+        </PixelButton>
+        <PixelButton variant="secondary" onClick={openDetails}>Developer Details</PixelButton>
+        <PixelButton variant="secondary" aria-pressed={state.save.audioEnabled} onClick={() => act('TOGGLE_AUDIO')}>
           Sound {state.save.audioEnabled ? 'On' : 'Off'}
         </PixelButton>
-      </div>
-      <p className="desktop-hint">WASD / ARROWS TO MOVE&nbsp;&nbsp; E / ENTER / SPACE TO ACT</p>
+      </nav>
+      <p className="desktop-hint">WASD / ARROWS TO MOVE&nbsp;&nbsp; E / ENTER / SPACE TO ACT&nbsp;&nbsp; ESC TO CLOSE</p>
+
+      {detailsOpen && (
+        <div className="developer-overlay" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setDetailsOpen(false)
+        }}>
+          <section className="developer-panel" role="dialog" aria-modal="true" aria-labelledby="developer-title">
+            <p>ACADEMY RECORD</p>
+            <h2 id="developer-title">DEVELOPER DETAILS</h2>
+            <dl>
+              <div><dt>PROJECT</dt><dd>PROJECT ORIGIN</dd></div>
+              <div><dt>FORMAT</dt><dd>2D PIXEL RPG</dd></div>
+              <div><dt>CURRICULUM</dt><dd>CV / ML / NLP</dd></div>
+              <div><dt>INPUT</dt><dd>KEYBOARD / TOUCH</dd></div>
+            </dl>
+            <p className="developer-copy">A story-driven AI academy built for the browser. Restore the foundation labs and uncover the sealed Research facility.</p>
+            <PixelButton autoFocus onClick={() => setDetailsOpen(false)}>Close</PixelButton>
+          </section>
+        </div>
+      )}
     </div>
   )
 }

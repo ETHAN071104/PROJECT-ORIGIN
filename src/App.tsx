@@ -7,9 +7,10 @@ import { IntroScene } from './scenes/IntroScene'
 import { LabCompleteScene } from './scenes/LabCompleteScene'
 import { LabInteriorScene } from './scenes/LabInteriorScene'
 import { NameEntryScene } from './scenes/NameEntryScene'
-import { StagePlaceholderScene } from './scenes/StagePlaceholderScene'
 import { CvLabScene } from './scenes/CvLabScene'
 import { MlLabScene } from './scenes/MlLabScene'
+import { NlpLabScene } from './scenes/NlpLabScene'
+import { ResearchMapScene } from './scenes/ResearchMapScene'
 import { TitleScreen } from './scenes/TitleScreen'
 
 export default function App() {
@@ -20,10 +21,11 @@ export default function App() {
       {state.screen === 'INTRO' && <IntroScene />}
       {state.screen === 'NAME_ENTRY' && <NameEntryScene />}
       {state.screen === 'HUB' && <HubScene />}
+      {state.screen === 'RESEARCH_MAP' && <ResearchMapScene />}
       {state.screen === 'LAB_INTERIOR' && <LabInteriorScene />}
       {state.screen === 'DIALOGUE' && <DialogueScene />}
       {state.screen === 'MINIGAME' && (
-        state.currentLab === 'cv' ? <CvLabScene /> : state.currentLab === 'ml' ? <MlLabScene /> : <StagePlaceholderScene />
+        state.currentLab === 'cv' ? <CvLabScene /> : state.currentLab === 'ml' ? <MlLabScene /> : <NlpLabScene />
       )}
       {state.screen === 'LAB_COMPLETE' && <LabCompleteScene />}
       {state.screen === 'ENDING' && <EndingScene />}

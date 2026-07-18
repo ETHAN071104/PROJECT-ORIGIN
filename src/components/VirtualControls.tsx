@@ -5,11 +5,12 @@ interface VirtualControlsProps {
   onDirectionChange: (direction: Direction, pressed: boolean) => void
   onReset: () => void
   onInteract: () => void
+  onExpress?: () => void
 }
 
 const directions: Direction[] = ['up', 'down', 'left', 'right']
 
-export function VirtualControls({ onDirectionChange, onReset, onInteract }: VirtualControlsProps) {
+export function VirtualControls({ onDirectionChange, onReset, onInteract, onExpress }: VirtualControlsProps) {
   const activePointers = useRef(new Map<number, Direction>())
 
   const syncDirections = useCallback(() => {
@@ -87,24 +88,39 @@ export function VirtualControls({ onDirectionChange, onReset, onInteract }: Virt
         {moveButton('right', '▶')}
         {moveButton('down', '▼')}
       </div>
-      <button
-        className="interact-button"
-        aria-label="Interact"
-        onPointerDown={(event) => {
-          event.preventDefault()
-          event.currentTarget.setPointerCapture(event.pointerId)
-          onInteract()
-        }}
-        onPointerUp={(event) => {
-          if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
-        }}
-        onPointerCancel={(event) => {
-          if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
-        }}
-      >
-        E
-        <small>ACT</small>
-      </button>
+      <div className="map-action-buttons">
+        {onExpress && (
+          <button
+            className="expression-button"
+            aria-label="Express a note"
+            onPointerDown={(event) => {
+              event.preventDefault()
+              onExpress()
+            }}
+          >
+            F
+            <small>VOICE</small>
+          </button>
+        )}
+        <button
+          className="interact-button"
+          aria-label="Interact"
+          onPointerDown={(event) => {
+            event.preventDefault()
+            event.currentTarget.setPointerCapture(event.pointerId)
+            onInteract()
+          }}
+          onPointerUp={(event) => {
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+          }}
+          onPointerCancel={(event) => {
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+          }}
+        >
+          E
+          <small>ACT</small>
+        </button>
+      </div>
     </div>
   )
 }

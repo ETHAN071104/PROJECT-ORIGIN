@@ -7,7 +7,7 @@ export function EndingScene() {
   return (
     <div className="scene ending-scene">
       <div className="ending-door"><i /><b><span>ORIGIN</span></b><i /></div>
-      <div className="ending-robot"><PixelRobot visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} /></div>
+      <div className="ending-robot"><PixelRobot visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} communicationUpgraded={state.save.completedLabs.nlp} /></div>
       <div className="ending-copy">
         <p>RESEARCH ACCESS GRANTED</p>
         <h2>Every answer opens another question.</h2>

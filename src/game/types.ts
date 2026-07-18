@@ -1,11 +1,12 @@
 export type LabId = 'cv' | 'ml' | 'nlp'
-export type HubSpawnId = 'hub-default' | 'hub-from-cv' | 'hub-from-ml' | 'hub-from-nlp' | 'hub-from-research'
+export type HubSpawnId = 'hub-default' | 'hub-from-cv' | 'hub-from-ml' | 'hub-from-nlp' | 'hub-from-east-gate'
 
 export type GameScreen =
   | 'TITLE'
   | 'INTRO'
   | 'NAME_ENTRY'
   | 'HUB'
+  | 'RESEARCH_MAP'
   | 'LAB_INTERIOR'
   | 'DIALOGUE'
   | 'MINIGAME'
@@ -58,7 +59,12 @@ export type GameAction =
   | { type: 'RECORD_ML_STAGE'; stage: 1 | 2 | 3 }
   | { type: 'COMPLETE_ML_LAB' }
   | { type: 'FINISH_ML_LAB' }
+  | { type: 'RECORD_NLP_STAGE'; stage: 1 | 2 | 3 }
+  | { type: 'COMPLETE_NLP_LAB' }
+  | { type: 'FINISH_NLP_LAB' }
   | { type: 'ACKNOWLEDGE_LAB_COMPLETE' }
+  | { type: 'ENTER_RESEARCH_ROUTE' }
+  | { type: 'RETURN_TO_HUB' }
   | { type: 'OPEN_RESEARCH' }
   | { type: 'TOGGLE_AUDIO' }
 

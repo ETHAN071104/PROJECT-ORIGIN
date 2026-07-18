@@ -57,8 +57,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'START_DIALOGUE':
       return { ...state, screen: 'DIALOGUE', dialogueKey: action.key }
     case 'DIALOGUE_COMPLETE':
-      if (state.dialogueKey === 'research-locked') {
-        return { ...state, screen: 'HUB', dialogueKey: null }
+      if (state.dialogueKey === 'research-locked' || state.dialogueKey === 'research-powered') {
+        return { ...state, screen: 'RESEARCH_MAP', dialogueKey: null }
       }
       return { ...state, screen: 'MINIGAME', dialogueKey: null }
     case 'COMPLETE_STAGE': {
@@ -94,16 +94,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'COMPLETE_CV_LAB': {
       if (state.currentLab !== 'cv') return state
       const achievement = 'MACHINES_FIRST_SIGHT'
+      const completedLabs = { ...state.save.completedLabs, cv: true }
+      const achievements = state.save.achievements.includes(achievement)
+        ? [...state.save.achievements]
+        : [...state.save.achievements, achievement]
+      if (completedLabs.cv && completedLabs.ml && completedLabs.nlp && !achievements.includes('AI_AWAKENED')) {
+        achievements.push('AI_AWAKENED')
+      }
       return {
         ...state,
         hasStoredSave: true,
         save: {
           ...state.save,
-          completedLabs: { ...state.save.completedLabs, cv: true },
+          completedLabs,
           stageProgress: { ...state.save.stageProgress, cv: 4 },
-          achievements: state.save.achievements.includes(achievement)
-            ? state.save.achievements
-            : [...state.save.achievements, achievement],
+          achievements,
         },
       }
     }
@@ -125,21 +130,61 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'COMPLETE_ML_LAB': {
       if (state.currentLab !== 'ml') return state
       const achievement = 'PATTERN_FINDER'
+      const completedLabs = { ...state.save.completedLabs, ml: true }
+      const achievements = state.save.achievements.includes(achievement)
+        ? [...state.save.achievements]
+        : [...state.save.achievements, achievement]
+      if (completedLabs.cv && completedLabs.ml && completedLabs.nlp && !achievements.includes('AI_AWAKENED')) {
+        achievements.push('AI_AWAKENED')
+      }
       return {
         ...state,
         hasStoredSave: true,
         save: {
           ...state.save,
-          completedLabs: { ...state.save.completedLabs, ml: true },
+          completedLabs,
           stageProgress: { ...state.save.stageProgress, ml: 4 },
-          achievements: state.save.achievements.includes(achievement)
-            ? state.save.achievements
-            : [...state.save.achievements, achievement],
+          achievements,
         },
       }
     }
     case 'FINISH_ML_LAB':
       return state.currentLab === 'ml' ? { ...state, screen: 'LAB_COMPLETE' } : state
+    case 'RECORD_NLP_STAGE':
+      if (state.currentLab !== 'nlp') return state
+      return {
+        ...state,
+        hasStoredSave: true,
+        save: {
+          ...state.save,
+          stageProgress: {
+            ...state.save.stageProgress,
+            nlp: Math.max(state.save.stageProgress.nlp, action.stage),
+          },
+        },
+      }
+    case 'COMPLETE_NLP_LAB': {
+      if (state.currentLab !== 'nlp') return state
+      const completedLabs = { ...state.save.completedLabs, nlp: true }
+      const achievements = state.save.achievements.includes('LANGUAGE_DECODER')
+        ? [...state.save.achievements]
+        : [...state.save.achievements, 'LANGUAGE_DECODER']
+      if (completedLabs.cv && completedLabs.ml && completedLabs.nlp && !achievements.includes('AI_AWAKENED')) {
+        achievements.push('AI_AWAKENED')
+      }
+      return {
+        ...state,
+        hasStoredSave: true,
+        save: {
+          ...state.save,
+          completedLabs,
+          stageProgress: { ...state.save.stageProgress, nlp: 4 },
+          achievements,
+        },
+      }
+    }
+    case 'FINISH_NLP_LAB':
+      return state.currentLab === 'nlp' ? { ...state, screen: 'LAB_COMPLETE' } : state
     case 'ACKNOWLEDGE_LAB_COMPLETE':
       return {
         ...state,
@@ -147,10 +192,28 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         currentLab: null,
         hubSpawn: state.currentLab ? `hub-from-${state.currentLab}` : state.hubSpawn,
       }
+    case 'ENTER_RESEARCH_ROUTE':
+      return {
+        ...state,
+        screen: 'RESEARCH_MAP',
+        currentLab: null,
+        dialogueKey: null,
+      }
+    case 'RETURN_TO_HUB':
+      return {
+        ...state,
+        screen: 'HUB',
+        currentLab: null,
+        dialogueKey: null,
+        hubSpawn: 'hub-from-east-gate',
+      }
     case 'OPEN_RESEARCH':
-      return allLabsComplete(state.save)
-        ? { ...state, screen: 'ENDING', currentLab: null, hubSpawn: 'hub-from-research' }
-        : { ...state, screen: 'DIALOGUE', dialogueKey: 'research-locked', hubSpawn: 'hub-from-research' }
+      return {
+        ...state,
+        screen: 'DIALOGUE',
+        currentLab: null,
+        dialogueKey: allLabsComplete(state.save) ? 'research-powered' : 'research-locked',
+      }
     case 'TOGGLE_AUDIO':
       return { ...state, save: { ...state.save, audioEnabled: !state.save.audioEnabled } }
     default:
