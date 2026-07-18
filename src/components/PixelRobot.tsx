@@ -4,12 +4,13 @@ interface PixelRobotProps {
   direction?: Direction
   walking?: boolean
   awakened?: boolean
+  visionUpgraded?: boolean
   className?: string
 }
 
-export function PixelRobot({ direction = 'down', walking = false, awakened = true, className = '' }: PixelRobotProps) {
+export function PixelRobot({ direction = 'down', walking = false, awakened = true, visionUpgraded = false, className = '' }: PixelRobotProps) {
   return (
-    <div className={`pixel-robot face-${direction} ${walking ? 'is-walking' : ''} ${className}`} aria-label="Small robot">
+    <div className={`pixel-robot face-${direction} ${walking ? 'is-walking' : ''} ${visionUpgraded ? 'has-vision-upgrade' : ''} ${className}`} aria-label="Small robot">
       <div className="robot-antenna" />
       <div className="robot-head">
         <span className={awakened ? 'eye lit' : 'eye'} />

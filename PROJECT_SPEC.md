@@ -108,7 +108,18 @@ Mentors appear in dialogue only.
 
 Build one tiny hub with a central plaza, three accessible labs, a locked Research Lab, trees, lamps, signs, and academy technology. Labs can be entered in any order. The Research Lab unlocks only after all three labs are completed. Do not add quests, roaming NPCs, item collection, large maps, complex collision, or multiple floors.
 
-Each tiny lab interior lets the player walk to a terminal, interact, meet the mentor, and begin ordered placeholder stages. Completing the current placeholder sequence marks the lab complete and returns the player to the hub.
+Each tiny lab interior lets the player walk to a terminal, interact, meet the mentor, and begin ordered learning stages. The Computer Vision Lab is fully playable. Machine Learning and Natural Language Processing retain placeholder activities until their dedicated implementation passes.
+
+## Computer Vision Lab
+
+The Computer Vision Lab is a four-stage sequential module led by LENS-01. The first playthrough cannot skip stages. Every activity uses mouse, touch, and native keyboard focus controls, permits unlimited retries, gives immediate feedback, reveals a humorous hint after two mistakes, and explains the concept only after successful interaction.
+
+1. Image Classification: classify cat, car, tree, street lamp, robot, and apple images into Living, Machine, and Object categories.
+2. Spot the Difference: find three clear feature changes across two roadside scenes.
+3. Object Location: select Car, Tree, or Street Lamp and mark one car, two trees, and two street lamps using predefined touch-friendly rectangles.
+4. Autonomous Driving: clear three deterministic daytime road rounds by pausing each live scene in place, labeling five frozen targets, and reaching 80 percent accuracy. Then watch a clearly labeled machine-vision replay steer around another car.
+
+CV progress uses `stageProgress.cv` values from 0 through 4. Each successfully completed activity is persisted immediately. Leaving or reloading resumes at the next incomplete stage. Completing the boss sets `completedLabs.cv`, unlocks `MACHINES_FIRST_SIGHT`, adds the protagonist eye upgrade, and returns the player outside the CV Lab door through the existing named spawn-point system.
 
 ## First implementation pass
 
@@ -120,5 +131,5 @@ Each tiny lab interior lets the player walk to a terminal, interact, meet the me
 - Locked Research Lab door.
 - Reusable dialogue system.
 - localStorage save/continue.
-- Placeholder stage screens for later mini-game implementation.
-- No full mini-games yet.
+- Complete Computer Vision Lab stages.
+- Placeholder stage screens remain for Machine Learning and Natural Language Processing.

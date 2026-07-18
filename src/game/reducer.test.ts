@@ -13,7 +13,25 @@ describe('Project Origin navigation state machine', () => {
     state = gameReducer(state, { type: 'SET_NAME', name: 'ORI' })
     expect(state.screen).toBe('HUB')
 
-    for (const lab of ['cv', 'ml', 'nlp'] as const) {
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'cv' })
+    expect(state.screen).toBe('LAB_INTERIOR')
+    state = gameReducer(state, { type: 'START_DIALOGUE', key: 'cv-intro' })
+    state = gameReducer(state, { type: 'DIALOGUE_COMPLETE' })
+    expect(state.screen).toBe('MINIGAME')
+    state = gameReducer(state, { type: 'RECORD_CV_STAGE', stage: 1 })
+    state = gameReducer(state, { type: 'RECORD_CV_STAGE', stage: 2 })
+    state = gameReducer(state, { type: 'RECORD_CV_STAGE', stage: 3 })
+    expect(state.save.stageProgress.cv).toBe(3)
+    state = gameReducer(state, { type: 'COMPLETE_CV_LAB' })
+    expect(state.save.stageProgress.cv).toBe(4)
+    expect(state.save.completedLabs.cv).toBe(true)
+    expect(state.save.achievements).toContain('MACHINES_FIRST_SIGHT')
+    state = gameReducer(state, { type: 'FINISH_CV_LAB' })
+    expect(state.screen).toBe('LAB_COMPLETE')
+    state = gameReducer(state, { type: 'ACKNOWLEDGE_LAB_COMPLETE' })
+    expect(state.hubSpawn).toBe('hub-from-cv')
+
+    for (const lab of ['ml', 'nlp'] as const) {
       state = gameReducer(state, { type: 'ENTER_LAB', lab })
       expect(state.screen).toBe('LAB_INTERIOR')
       state = gameReducer(state, { type: 'START_DIALOGUE', key: `${lab}-intro` })
@@ -49,5 +67,16 @@ describe('Project Origin navigation state machine', () => {
     expect(state.screen).toBe('HUB')
     expect(state.currentLab).toBeNull()
     expect(state.hubSpawn).toBe(`hub-from-${lab}`)
+  })
+
+  it('never moves CV progress backwards and ignores CV actions outside the CV lab', () => {
+    let state = createInitialState(null)
+    state = gameReducer(state, { type: 'RECORD_CV_STAGE', stage: 2 })
+    expect(state.save.stageProgress.cv).toBe(0)
+
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'cv' })
+    state = gameReducer(state, { type: 'RECORD_CV_STAGE', stage: 3 })
+    state = gameReducer(state, { type: 'RECORD_CV_STAGE', stage: 1 })
+    expect(state.save.stageProgress.cv).toBe(3)
   })
 })

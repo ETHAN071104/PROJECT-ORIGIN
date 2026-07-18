@@ -17,13 +17,23 @@ export function loadSave(): SaveData | null {
     if (!raw) return null
     const parsed = JSON.parse(raw) as Partial<SaveData>
     if (!parsed.completedLabs || !parsed.stageProgress) return null
-    return {
+    const save = {
       ...emptySave(parsed.audioEnabled ?? true),
       ...parsed,
       completedLabs: { ...emptySave().completedLabs, ...parsed.completedLabs },
       stageProgress: { ...emptySave().stageProgress, ...parsed.stageProgress },
       achievements: Array.isArray(parsed.achievements) ? parsed.achievements : [],
     }
+    save.stageProgress.cv = Math.max(0, Math.min(4, Number(save.stageProgress.cv) || 0))
+    save.stageProgress.ml = Math.max(0, Number(save.stageProgress.ml) || 0)
+    save.stageProgress.nlp = Math.max(0, Number(save.stageProgress.nlp) || 0)
+
+    // Saves created by the former one-button CV placeholder resume after the
+    // recorded stage instead of incorrectly skipping the new complete lab.
+    if (save.completedLabs.cv && save.stageProgress.cv < 4 && !save.achievements.includes('MACHINES_FIRST_SIGHT')) {
+      save.completedLabs.cv = false
+    }
+    return save
   } catch {
     return null
   }

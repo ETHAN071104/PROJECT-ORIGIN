@@ -5,23 +5,28 @@ export const dialogueScripts: Record<string, DialogueLine[]> = {
     {
       speaker: 'LENS-01',
       portrait: 'mentor',
-      text: 'Freeze! Hold that pose. The lighting is extremely educational.',
+      text: 'My cameras work perfectly.',
     },
     {
       speaker: 'LENS-01',
       portrait: 'mentor',
-      text: 'I am LENS-01. In this lab, you will sort what you see before I explain how a machine does it.',
+      text: 'My understanding does not.',
+    },
+    {
+      speaker: 'LENS-01',
+      portrait: 'mentor',
+      text: 'Teach me how to see.',
     },
     {
       speaker: '{{player}}',
       portrait: 'player',
-      text: 'So I look first, then learn why it worked?',
-      choices: ['Focus the lens', 'Ready when you are'],
+      text: 'We learn by looking first?',
+      choices: ['Focus the lens', 'Start training'],
     },
     {
       speaker: 'LENS-01',
       portrait: 'mentor',
-      text: 'Precisely. Very photogenic reasoning. Approach the visual console.',
+      text: 'Precisely. Four tests. Short explanations. Excellent lighting.',
     },
   ],
   'ml-intro': [
