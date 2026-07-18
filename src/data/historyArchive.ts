@@ -168,6 +168,15 @@ export const HALL_TIMELINE_ENTRIES: readonly HistoryEntry[] = [
     section: 'surprising-systems',
   },
   {
+    id: 'hall-backpropagation-1986',
+    year: '1986',
+    title: 'BACKPROPAGATION POPULARIZED',
+    shortText: 'A landmark paper showed how multilayer neural networks could learn useful internal representations from error signals.',
+    category: 'SYSTEMS THAT SURPRISED US',
+    icon: 'backpropagation',
+    section: 'surprising-systems',
+  },
+  {
     id: 'hall-deep-blue-1997',
     year: '1997',
     title: 'DEEP BLUE',

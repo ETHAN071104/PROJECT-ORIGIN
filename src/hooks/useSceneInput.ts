@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { EMPTY_INPUT } from '../game/movement'
+import { GAME_INPUT_RESET_EVENT, isGlobalGameInputBlocked } from '../game/immersive'
 import type { Direction, MovementInput } from '../game/types'
 
 const directionForCode: Record<string, Direction | undefined> = {
@@ -46,6 +47,7 @@ export function useSceneInput(
   }, [])
 
   const setDirection = useCallback((direction: Direction, pressed: boolean) => {
+    if (isGlobalGameInputBlocked()) return
     if (pressed) {
       virtualDirections.current.add(direction)
       pendingDirections.current.add(direction)
@@ -73,6 +75,11 @@ export function useSceneInput(
     const tick = (time: number) => {
       const deltaSeconds = Math.min((time - previousTime) / 1000, 0.05)
       previousTime = time
+      if (isGlobalGameInputBlocked()) {
+        resetDirections()
+        animationFrame = window.requestAnimationFrame(tick)
+        return
+      }
       const frameInput = { ...input.current }
       const hasPendingDirection = pendingDirections.current.size > 0
       for (const direction of pendingDirections.current) frameInput[direction] = true
@@ -82,6 +89,10 @@ export function useSceneInput(
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (isGlobalGameInputBlocked()) {
+        if (directionForCode[event.code] || interactionCodes.has(event.code)) event.preventDefault()
+        return
+      }
       const direction = directionForCode[event.code]
       if (direction) {
         event.preventDefault()
@@ -115,6 +126,7 @@ export function useSceneInput(
     window.addEventListener('keydown', onKeyDown, { passive: false })
     window.addEventListener('keyup', onKeyUp, { passive: false })
     window.addEventListener('blur', resetDirections)
+    window.addEventListener(GAME_INPUT_RESET_EVENT, resetDirections)
     document.addEventListener('visibilitychange', resetOnVisibilityLoss)
 
     return () => {
@@ -122,6 +134,7 @@ export function useSceneInput(
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
       window.removeEventListener('blur', resetDirections)
+      window.removeEventListener(GAME_INPUT_RESET_EVENT, resetDirections)
       document.removeEventListener('visibilitychange', resetOnVisibilityLoss)
       resetDirections()
     }

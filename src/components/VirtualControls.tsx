@@ -4,13 +4,14 @@ import type { Direction } from '../game/types'
 interface VirtualControlsProps {
   onDirectionChange: (direction: Direction, pressed: boolean) => void
   onReset: () => void
-  onInteract: () => void
+  onInteract?: () => void
+  interactionLabel?: string
   onExpress?: () => void
 }
 
 const directions: Direction[] = ['up', 'down', 'left', 'right']
 
-export function VirtualControls({ onDirectionChange, onReset, onInteract, onExpress }: VirtualControlsProps) {
+export function VirtualControls({ onDirectionChange, onReset, onInteract, interactionLabel, onExpress }: VirtualControlsProps) {
   const activePointers = useRef(new Map<number, Direction>())
 
   const syncDirections = useCallback(() => {
@@ -102,24 +103,26 @@ export function VirtualControls({ onDirectionChange, onReset, onInteract, onExpr
             <small>VOICE</small>
           </button>
         )}
-        <button
-          className="interact-button"
-          aria-label="Interact"
-          onPointerDown={(event) => {
-            event.preventDefault()
-            event.currentTarget.setPointerCapture(event.pointerId)
-            onInteract()
-          }}
-          onPointerUp={(event) => {
-            if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
-          }}
-          onPointerCancel={(event) => {
-            if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
-          }}
-        >
-          E
-          <small>ACT</small>
-        </button>
+        {onInteract && (
+          <button
+            className="interact-button"
+            aria-label={interactionLabel ? `Interact: ${interactionLabel}` : 'Interact'}
+            onPointerDown={(event) => {
+              event.preventDefault()
+              event.currentTarget.setPointerCapture(event.pointerId)
+              onInteract()
+            }}
+            onPointerUp={(event) => {
+              if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+            }}
+            onPointerCancel={(event) => {
+              if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+            }}
+          >
+            E
+            <small>{interactionLabel ? interactionLabel.slice(0, 12) : 'ACT'}</small>
+          </button>
+        )}
       </div>
     </div>
   )

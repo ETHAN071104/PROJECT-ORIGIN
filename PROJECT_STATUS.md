@@ -75,28 +75,45 @@ Updated: 2026-07-18
 - Stage 0-4 persistence, `NEURAL_CORE_ONLINE` / Neural Core Online, replay, procedural DL audio cues, a persistent antenna/core upgrade, `hub-from-dl` return, Lab Signals `4 / 4`, and East Gate unlock are complete.
 - Every mentor hint can now be closed after it appears, without resetting the activity.
 
-## Completed world-map redesign
+## Completed world-map and navigation revision
 
-- Replaced the former presentation-board layout with three playable, flat 2D pixel-game maps.
-- Hub Map is a compact, asymmetric academy campus with CV, ML, NLP, and locked DL buildings surrounding a small ORIGIN ground emblem.
-- The former central Research building is removed. After DL completion, the east gate now leads to Hall of Origins rather than directly to Research.
-- Hall of Origins is a compact horizontal archive linking the Academy west exit to the Research District east exit.
-- Research Lab Complex is a separate horizontal exploration map containing three sealed future-module wings, a converging final corridor, and the larger ARCHIVE ZERO Final Gate.
+- The world now uses four playable, flat 2D pixel-game maps: Hub, AI History Events, People of AI Gallery, and Research Lab Complex.
+- Hub remains a compact asymmetric Academy campus with CV, ML, NLP, and foundation-gated DL buildings around the environmental ORIGIN emblem.
+- Research is an independent east branch from Hub after DL completion. History is an optional south branch and is never required to reach Research.
+- AI History Events continues south into People Gallery; People returns north to Events and has no Research exit.
+- Centralized named spawns cover `hub-from-history`, `hub-from-research`, `history-events-from-hub`, `history-events-from-people`, `people-from-events`, and `research-from-hub`. Every arrival faces away and starts outside the immediate transition trigger.
+- Research Lab Complex retains its three sealed future-module wings, converging final corridor, and ARCHIVE ZERO Final Gate without a structural redesign.
 - Hub starts in a quiet, low-energy night state. Completing CV restores a warmer day palette and clearer campus visibility.
 - Completing ML powers animated relays and data conduits. Completing NLP decodes campus signs and unlocks `F` voice expression using do/re/mi/fa/so tone choices.
-- Completing all three foundation labs activates DL, but the east route remains sealed. Completing DL powers the east-route beacon and unlocks Hall and Research traversal while ARCHIVE ZERO remains authorization-pending.
+- Completing all three foundation labs activates DL, but the east route remains sealed. Completing DL powers direct Hub-to-Research traversal while ARCHIVE ZERO remains authorization-pending.
 - The available DL building displays a quest exclamation mark, completed lab doors display a check badge, and the Hub HUD includes a save-preserving Home button back to the title menu.
-- Right-edge and left-edge walk transitions, named return spawns, keyboard controls, and mobile interaction/voice buttons are complete.
+- South/north History traversal, east/west Research traversal, named return spawns, keyboard controls, and contextual mobile interaction/voice buttons are complete.
 
-## Completed Hall of Origins and history content
+## Completed History Events and People Gallery content
 
 - Every foundational Lab interior keeps its central gameplay terminal and adds two optional side exhibits: Shakey and AlexNet in CV, Arthur Samuel and AlphaGo in ML, ELIZA and the Transformer in NLP, and backpropagation popularization and Deep Belief Nets in DL.
 - The shared exhibit component supports `E`, Enter, Space, touch interaction, close controls, concise first pages, optional Why It Matters pages, read-state lights, and opposite-side panels that do not cover the player.
 - `src/data/historyArchive.ts` centralizes all historical entries, people records, Modern Builders wording, categories, dates, and original procedural icon keys.
-- Hall of Origins contains three readable timeline zones with 11 optional archive entries from 1950 through 2023, including paired Shakey/ELIZA and Claude/Gemini displays plus the explicit limited-timeline archive note.
-- The People of AI gallery contains eight contributor terminals for Alan Turing, John McCarthy, Arthur Samuel, Geoffrey Hinton, Yoshua Bengio, Yann LeCun, Fei-Fei Li, and Demis Hassabis.
+- AI History Events contains only event terminals: 12 chronological records from 1950 through 2023, including the 1986 backpropagation-popularization milestone, paired Shakey/ELIZA, Claude/Gemini, and the explicit limited-timeline archive note.
+- The separate People of AI Gallery contains only eight contributor terminals for Alan Turing, John McCarthy, Arthur Samuel, Geoffrey Hinton, Yoshua Bengio, Yann LeCun, Fei-Fei Li, and Demis Hassabis.
 - The optional Modern Builders display uses contribution-based wording for Jensen Huang, Sam Altman, and Dario Amodei and explicitly credits the wider communities that build modern AI.
-- History reading remains optional and never gates travel to Research.
+- History reading and traversal remain optional and never gate direct Hub-to-Research travel.
+
+## Completed contextual HUD and Voice ability
+
+- `src/game/interactions.ts` centralizes interaction candidates and selects one nearest in-range target with deterministic distance, priority, and ID ordering.
+- Empty exploration space renders no E prompt and no mobile interaction button. Lab doors, terminals, exhibits, contributor displays, map returns, future doors, and ARCHIVE ZERO expose one contextual action only while in range.
+- Desktop E/Enter/Space and the mobile E button call the same active action; blocking archive/Research panels suppress map interaction.
+- NLP completion exposes permanent desktop and touch Voice controls during Hub, History Events, People Gallery, and Research exploration. Dialogue/panels, mini-games, title, intro, and result scenes do not expose it.
+- Voice produces randomized do/re/mi/fa/so tones, three pixel-note particles, respects Sound On/Off, and applies a 550 ms cooldown.
+
+## Completed mobile immersion and PWA shell
+
+- Touch-mobile detection combines coarse-pointer, hover, touch-point, and viewport signals; standalone mode uses display-mode plus the safe iOS standalone flag.
+- Non-standalone mobile browsers receive a pixel-art setup gate with user-triggered fullscreen, Install App, clear unsupported/rejected fallback, and Continue in Browser.
+- Exiting an entered fullscreen session clears held input, pauses movement in place, and offers Return to Fullscreen or Continue in Browser without resetting the current scene or Lab.
+- The existing portrait guard, fixed 960 x 540 logical frame, ResizeObserver scaling, pointer conversion, safe areas, and browser fallback remain intact.
+- `manifest.webmanifest`, 192/512 pixel icons, production service-worker registration, runtime build-asset caching, standalone display, and offline navigation shell are complete. No API cache exists.
 
 ## Completed Research Lab Complex structure
 
@@ -111,19 +128,21 @@ Updated: 2026-07-18
 - Completing the third foundation lab awards `AI_AWAKENED` regardless of which lab is finished last and never duplicates the achievement.
 - The three foundation flags activate DL and award `AI_AWAKENED`; they do not open the east route.
 - Completing DL awards `NEURAL_CORE_ONLINE`, returns the player outside DL facing away from its door, powers the Hub route beacon, and unlocks the Hall route.
-- Navigation is now Hub → Hall of Origins → Research Lab Complex → ARCHIVE ZERO, with named return spawns at every map boundary.
+- Navigation is now Hub east → Research Lab Complex → ARCHIVE ZERO, while the independent optional branch is Hub south → AI History Events south → People of AI Gallery.
 - Research exploration and the Final Gate become available after DL, but the existing ending scene remains dormant for the later origin-reveal phase.
 
 ## Current architecture
 
 - `src/App.tsx` selects a scene from the reducer screen and active lab.
 - `src/game/GameContext.tsx` owns reducer state and persists every save-state change.
-- `src/game/reducer.ts` owns navigation, foundation/DL gates, monotonic CV/ML/NLP/DL progress, achievements, named spawns, optional history reads, and Hall/Research/Final Gate state.
+- `src/game/reducer.ts` owns the independent History and Research branches, foundation/DL gates, monotonic CV/ML/NLP/DL progress, achievements, named spawns, optional history reads, and Final Gate state.
 - `src/game/storage.ts` owns `project-origin-save-v1`, safe four-lab/world defaults, stage clamping, and legacy placeholder migrations.
-- `src/data/maps.ts` owns Hub/Hall/Research bounds, targets, transition thresholds, and named spawns.
+- `src/data/maps.ts` owns Hub/History/People/Research bounds, targets, transition thresholds, and named spawns.
 - `src/data/historyArchive.ts` owns all Lab exhibits, Hall timeline entries, People of AI records, and Modern Builders content.
 - `src/data/cvLab.ts`, `src/data/mlLab.ts`, `src/data/nlpLab.ts`, and `src/data/dlLab.ts` keep deterministic teaching content and answer helpers separate from presentation.
-- `src/scenes/HubScene.tsx`, `src/scenes/HistoryMapScene.tsx`, and `src/scenes/ResearchMapScene.tsx` own the three-map traversal, while the four lab scenes own their independent sequential flows.
+- `src/scenes/HubScene.tsx`, `src/scenes/HistoryMapScene.tsx`, `src/scenes/PeopleMapScene.tsx`, and `src/scenes/ResearchMapScene.tsx` own four-map traversal, while the four Lab scenes keep their independent sequential flows.
+- `src/game/interactions.ts` and `src/components/InteractionPrompt.tsx` own contextual target selection and the single shared E HUD contract.
+- `src/game/immersive.ts` and `src/components/GameViewport.tsx` own touch-mobile detection, fullscreen/install state, input pausing, and standalone launch behavior.
 - `src/hooks/useVoiceExpression.ts` owns NLP-unlocked `F` note selection, playback, and the short-lived map expression bubble.
 - `src/styles/maps.css` owns the flat pixel-map system; `cv.css`, `ml.css`, `nlp.css`, and `dl.css` isolate each lab's procedural visual extension.
 - Shared `PixelRobot` and `Portrait` components compose the persistent vision, learning, communication, and neural-core upgrades.
@@ -145,7 +164,7 @@ Storage key: `project-origin-save-v1`
     researchVisited: boolean
     finalGateReached: boolean
     readExhibitIds: string[]
-    lastMap: 'hub' | 'history' | 'research'
+    lastMap: 'hub' | 'history' | 'people' | 'research'
     lastSpawn: string
   }
 }
@@ -155,12 +174,14 @@ Storage key: `project-origin-save-v1`
 - Loading merges missing fields with defaults and clamps every stage to 0-4.
 - Three-lab saves migrate with `completedLabs.dl = false` and `stageProgress.dl = 0` without changing the existing player, settings, lab progress, or achievements.
 - Saves from former CV, ML, or NLP placeholder completions resume the corresponding real curriculum unless the new completion achievement is present.
-- Saves without world progress receive safe Hub defaults. Valid Hall/Research visits, optional read IDs, Final Gate state, last map, and named entry spawn persist across refresh.
+- Saves without world progress receive safe Hub defaults. Valid History/People/Research visits, optional read IDs, Final Gate state, last map, and named entry spawn persist across refresh. Former corridor spawn IDs migrate to the new branches.
 
 ## Known limitations
 
 - The true origin room, protagonist origin reveal, final narrative resolution, and ending remain intentionally unimplemented.
-- The new world route received browser traversal coverage, but the complete four-Lab curriculum click-through was not rerun in this phase because the Lab mini-games were deliberately left unchanged.
+- The revised History branch received browser traversal coverage, but direct Research browser traversal and the complete four-Lab curriculum click-through were not rerun in this phase because the available local save had only CV complete and the Lab mini-games were deliberately left unchanged.
+- iOS/iPadOS does not expose the standard install prompt or general element fullscreen consistently; the game therefore shows Add to Home Screen guidance and preserves Continue in Browser rather than claiming success.
+- Service workers and native installation require a secure production origin (HTTPS, with localhost accepted for development). Vite development mode intentionally does not register the service worker to avoid stale local bundles.
 - Audio remains intentionally limited to generated tones.
 - Collision is deliberately simple and rectangular for the hackathon scope.
 - Prediction bars, factory classification, and all displayed model behavior are transparent deterministic teaching simulations, not real inference.
@@ -168,10 +189,24 @@ Storage key: `project-origin-save-v1`
 ## Next planned phase
 
 1. Build the later ARCHIVE ZERO truth room and final narrative ending without reopening or rewriting the four completed academy labs.
-2. Perform the planned global art, lighting, character, portrait, and environmental-detail pass across all three maps.
+2. Perform the planned global art, lighting, character, portrait, and environmental-detail pass across all four maps.
 3. Consider a small checked-in browser smoke suite if the project moves beyond the hackathon MVP.
 
-## Verification completed
+## Current revision verification
+
+- Production build passes strict TypeScript checks.
+- 12 Vitest files pass with 63 total tests.
+- Reducer coverage verifies Hub south to History Events, Events south to People, both upward returns, direct Hub east to Research, the correct east-side Hub return spawn, safe Continue behavior, and no automatic ending at ARCHIVE ZERO.
+- Storage coverage verifies legacy corridor-spawn migration, History/People persistence without Research access, valid Research state, filtering of invalid read IDs, and safe Hub fallback only for an invalid locked Research location.
+- Archive-data coverage verifies exactly eight Lab exhibits, 12 chronological event records, eight primary contributor records, unique IDs, and historically careful 1986 backpropagation wording.
+- Interaction tests verify hidden empty-space state, nearest-target selection, and deterministic priority ties. Browser traversal verified no desktop/mobile E control in empty Hub space and matching CV labels/actions when in range.
+- Voice tests verify the five syllables, permanent post-NLP exploration availability, non-exploration suppression, and the 550 ms cooldown.
+- Immersion tests verify mobile-gate state, desktop/standalone bypass, non-UA touch detection, unsupported/rejected fullscreen fallback, and safe orientation-lock rejection.
+- Browser traversal verified Hub south to the 12-event History map, continued south to the separate eight-person People Gallery, and returned north through both boundaries to Hub on a one-of-four save.
+- History Events and People Gallery were visually checked as separate rooms with no mixed record types. The fixed frame, no-scroll layout, and virtual controls were checked at 844 x 390 and 740 x 360; the portrait guard was checked at 390 x 844.
+- PWA output contains a standalone manifest, valid 192 x 192 and 512 x 512 PNG icons, service worker, and production offline-shell resources.
+
+## Prior verification archive
 
 - Production build passes strict TypeScript checks.
 - 10 Vitest files pass with 53 total tests.

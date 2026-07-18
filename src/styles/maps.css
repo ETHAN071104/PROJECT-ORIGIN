@@ -324,7 +324,7 @@
 .campus-sign { position: absolute; z-index: 7; min-width: 102px; padding: 6px 8px; color: #88939d; background: #1b2635; border: 3px solid #3d4b5c; box-shadow: 4px 4px #101724; text-align: center; font-size: 7px; font-weight: 900; letter-spacing: .07em; }
 .campus-sign i { position: absolute; left: 11px; top: 100%; width: 6px; height: 22px; background: #3d4b5c; }
 .campus-sign.is-decoded { color: #f0e3f4; border-color: #a673b7; }
-.sign-plaza { left: 31%; top: 44%; }.sign-route { right: 12%; top: 48%; }
+.sign-plaza { left: 31%; top: 44%; }.sign-route { right: 12%; top: 48%; }.sign-history { left: 56%; top: 82%; }
 
 .east-gate { position: absolute; z-index: 7; right: -2px; top: 45%; width: 9%; height: 31%; color: #a7b7c2; }
 .gate-post { position: absolute; right: 0; width: 34px; height: 38%; background: #33445b; border: 4px solid #17263a; box-shadow: inset 7px 0 #52637a; }
@@ -335,6 +335,10 @@
 .gate-beacon i { position: absolute; inset: 2px; background: #7d4e57; }
 .research-route-active .gate-beacon i { background: #d388ff; box-shadow: 0 0 12px #c274ee; animation: route-beacon 1.3s steps(3) infinite; }
 .research-route-active .east-gate > b { color: #d6a2f4; }
+.hub-map .history-south-gate { position: absolute; z-index: 7; left: 44%; bottom: -14px; width: 12%; height: 58px; color: #b9cbd0; background: #101b2a; border: 4px solid #53697a; box-shadow: inset 0 0 0 4px #1d2d3d; text-align: center; }
+.hub-map .history-south-gate i { position: absolute; top: 5px; bottom: 7px; width: 5px; background: #637784; }.hub-map .history-south-gate i:first-child { left: 9px; }.hub-map .history-south-gate i:last-child { right: 9px; }
+.hub-map .history-south-gate span { display: block; margin-top: 7px; font-size: 6px; font-weight: 900; }.hub-map .history-south-gate b { display: block; color: #75dce1; font-size: 15px; }
+.hub-map .history-south-gate { border-color: #69bfc2; box-shadow: inset 0 0 0 4px #1d2d3d, 0 0 11px rgb(101 217 232 / .3); }
 
 .system-relay { position: absolute; z-index: 6; width: 38px; height: 20px; opacity: .18; transition: opacity .25s steps(3); }
 .system-relay i { display: inline-block; width: 7px; height: 7px; margin: 3px 2px; background: #3f5d5d; border: 2px solid #1c343c; }
@@ -352,18 +356,20 @@
 .map-action-hints {
   position: absolute;
   z-index: 19;
-  left: 50%;
+  left: 0;
+  right: 0;
   bottom: 2.5%;
   display: flex;
   align-items: center;
   gap: 8px;
-  transform: translateX(-50%);
+  justify-content: center;
   pointer-events: none;
 }
 .map-action-hints .interaction-prompt { position: static; transform: none; }
-.voice-prompt { display: flex; align-items: center; gap: 6px; padding: 5px 8px; color: #d9b4e8; background: rgb(12 12 27 / .92); border: 2px solid #674777; font-size: 8px; white-space: nowrap; }
+.voice-prompt { position: absolute; right: 24px; display: flex; align-items: center; gap: 6px; padding: 5px 8px; color: #d9b4e8; background: rgb(12 12 27 / .92); border: 2px solid #674777; font-size: 8px; white-space: nowrap; }
 .voice-prompt > span { display: grid; place-items: center; width: 20px; height: 20px; color: #190d20; background: #d898ef; font-weight: 900; }
-.voice-note-bubble { position: absolute; z-index: 20; left: 50%; bottom: 100%; min-width: 48px; padding: 6px 7px; transform: translateX(-50%); color: #24102e; background: #f3caff; border: 3px solid #8f5bac; box-shadow: 4px 4px #0a0710; font-size: 9px; font-weight: 900; text-align: center; white-space: nowrap; }
+.voice-note-bubble { position: absolute; z-index: 20; left: 50%; bottom: 100%; min-width: 58px; padding: 6px 7px; transform: translateX(-50%); color: #24102e; background: #f3caff; border: 3px solid #8f5bac; box-shadow: 4px 4px #0a0710; font-size: 9px; font-weight: 900; text-align: center; white-space: nowrap; }
+.voice-note-bubble i { display: inline-block; margin: 0 2px; color: #6d397f; font-style: normal; }.voice-note-bubble i:nth-child(1) { transform: translateY(1px); }.voice-note-bubble i:nth-child(2) { transform: translateY(-4px); }.voice-note-bubble i:nth-child(3) { transform: translateY(-1px); }.voice-note-bubble b { display: block; margin-top: 1px; text-transform: lowercase; }
 .voice-note-bubble::after { content: ""; position: absolute; left: 50%; top: 100%; width: 8px; height: 8px; background: #f3caff; border-right: 3px solid #8f5bac; border-bottom: 3px solid #8f5bac; transform: translate(-50%, -50%) rotate(45deg); }
 .map-action-buttons { display: flex; align-items: end; gap: 10px; pointer-events: auto; }
 .expression-button { width: clamp(50px, 7.5cqw, 65px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; align-content: center; border: 3px solid #8f64a0; color: #e2b5f4; background: rgb(25 17 42 / .92); box-shadow: inset -3px -3px #0c0714, inset 3px 3px #554064; font-size: clamp(14px, 2.4cqw, 21px); font-weight: 900; touch-action: none; }
@@ -606,6 +612,27 @@
 .hall-east-gate > strong { position: absolute; right: 32px; bottom: 11px; color: #d99af0; font-size: 20px; }
 .hall-west-gate i, .hall-east-gate i { position: absolute; top: 14px; bottom: 14px; width: 5px; background: #536176; }.hall-west-gate i:first-of-type, .hall-east-gate i:first-of-type { left: 14px; }.hall-west-gate i:last-of-type, .hall-east-gate i:last-of-type { right: 14px; }
 .archive-timeline-note { position: absolute; z-index: 5; left: 50%; bottom: 17px; width: 310px; padding: 7px; transform: translateX(-50%); color: #aab4bc; background: rgb(11 16 28 / .9); border: 2px solid #4b596b; text-align: center; font-size: 7px; font-style: italic; }
+
+/* Revised south archive branch: event chronology and people are separate rooms. */
+.history-events-map .history-wall-grid { bottom: 22%; background: linear-gradient(180deg, #111a2b 0 34%, #172135 34% 67%, #1b1730 67%); }
+.history-events-map .history-zone { top: 8px; width: 27%; }.history-events-map .zone-foundations { left: 7%; }.history-events-map .zone-surprises { left: 36.5%; }.history-events-map .zone-modern { left: 66%; }
+.chronology-route { position: absolute; z-index: 2; left: 168px; right: 168px; top: 188px; height: 196px; opacity: .8; background: linear-gradient(90deg, #526676 0 100%) 0 0 / 100% 6px no-repeat, linear-gradient(90deg, #526676 0 100%) 0 93px / 100% 6px no-repeat, linear-gradient(90deg, #735a82 0 100%) 0 186px / 100% 6px no-repeat; }
+.chronology-route::before, .chronology-route::after { content: ""; position: absolute; width: 6px; height: 99px; background: #526676; }.chronology-route::before { right: 0; top: 0; }.chronology-route::after { left: 0; top: 93px; background: #655a7d; }
+.chronology-route i { position: absolute; width: 10px; height: 10px; background: #9adfe0; border: 2px solid #294b5a; transform: rotate(45deg); }.chronology-route i:nth-child(1) { left: 24%; top: -2px; }.chronology-route i:nth-child(2) { right: 24%; top: 91px; }.chronology-route i:nth-child(3) { left: 24%; bottom: -2px; background: #c18bdd; }.chronology-route i:nth-child(4) { right: 24%; bottom: -2px; background: #c18bdd; }
+.history-north-gate, .history-map .history-south-gate { position: absolute; z-index: 7; left: 412px; width: 136px; color: #c2d3d7; background: #10182a; border: 5px solid #52677b; box-shadow: inset 0 0 0 6px #1b263a; text-align: center; }
+.history-north-gate { top: -40px; height: 190px; }.history-map .history-south-gate { bottom: -46px; height: 126px; border-color: #705482; box-shadow: inset 0 0 0 6px #281d39, 0 0 12px rgb(174 105 210 / .25); }
+.history-north-gate span, .history-map .history-south-gate span { position: absolute; left: 50%; padding: 5px 7px; transform: translateX(-50%); background: #192438; font-size: 6px; font-weight: 900; white-space: nowrap; }.history-north-gate span { bottom: 12px; }.history-map .history-south-gate span { top: 12px; color: #e2bded; background: #281c39; }
+.history-north-gate i, .history-map .history-south-gate i { position: absolute; top: 12px; bottom: 12px; width: 5px; background: #536176; }.history-north-gate i:first-of-type, .history-map .history-south-gate i:first-of-type { left: 15px; }.history-north-gate i:last-of-type, .history-map .history-south-gate i:last-of-type { right: 15px; }
+.history-map .history-south-gate strong { position: absolute; left: 50%; top: 36px; transform: translateX(-50%); color: #d99af0; font-size: 20px; }
+.history-events-map .archive-timeline-note { left: 74px; bottom: 10px; width: 250px; transform: none; }
+
+.people-map { background-color: #171b2c; background-image: linear-gradient(90deg, rgb(198 165 218 / .04) 1px, transparent 1px), linear-gradient(rgb(255 255 255 / .025) 1px, transparent 1px); }
+.people-map .history-wall-grid { inset: 0 0 23%; background: linear-gradient(90deg, #151b2b 0 50%, #1d172d 50%); border-bottom-color: #665775; }
+.people-map .people-gallery-label { top: 82px; left: 90px; right: auto; width: 275px; color: #e4d8c6; border-color: #7c7083; }
+.people-gallery-rail { position: absolute; z-index: 2; left: 102px; right: 102px; height: 5px; background: #59657a; border: 1px solid #252d42; }.people-gallery-rail.rail-one { top: 222px; }.people-gallery-rail.rail-two { top: 341px; background: #725b7d; }
+.modern-builders-label { position: absolute; z-index: 5; left: 370px; top: 354px; width: 220px; padding: 5px 7px; color: #d5b5df; background: #21172e; border: 2px solid #735685; text-align: center; font-size: 6px; font-weight: 900; }
+.people-map .modern-builders-terminal { z-index: 7; }
+.people-return-gate { border-color: #705482; box-shadow: inset 0 0 0 6px #281d39; }
 
 /* Research Complex: sealed future wings leading to the larger Archive Zero gate. */
 .research-complex-map { background: linear-gradient(90deg, #152133 0 18%, #121a2f 45%, #0b1022 72%, #080a18 100%); }

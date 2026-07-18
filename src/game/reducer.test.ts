@@ -64,7 +64,9 @@ describe('Project Origin navigation state machine', () => {
     state = gameReducer(state, { type: 'ACKNOWLEDGE_LAB_COMPLETE' })
     expect(state.hubSpawn).toBe('hub-from-nlp')
 
-    state = gameReducer(state, { type: 'ENTER_RESEARCH_ROUTE' })
+    state = gameReducer(state, { type: 'ENTER_HISTORY_ROUTE' })
+    expect(state.screen).toBe('HISTORY_MAP')
+    state = gameReducer(state, { type: 'RETURN_TO_HUB_FROM_HISTORY' })
     expect(state.screen).toBe('HUB')
 
     state = gameReducer(state, { type: 'ENTER_LAB', lab: 'dl' })
@@ -84,33 +86,37 @@ describe('Project Origin navigation state machine', () => {
     state = gameReducer(state, { type: 'ACKNOWLEDGE_LAB_COMPLETE' })
     expect(state.hubSpawn).toBe('hub-from-dl')
 
-    state = gameReducer(state, { type: 'ENTER_RESEARCH_ROUTE' })
+    state = gameReducer(state, { type: 'ENTER_HISTORY_ROUTE' })
     expect(state.screen).toBe('HISTORY_MAP')
-    expect(state.historySpawn).toBe('history-from-academy')
+    expect(state.historySpawn).toBe('history-events-from-hub')
     expect(state.save.worldProgress.hallVisited).toBe(true)
     state = gameReducer(state, { type: 'READ_HISTORY_ENTRY', id: 'hall-imitation-game-1950' })
     expect(state.save.worldProgress.readExhibitIds).toContain('hall-imitation-game-1950')
-    state = gameReducer(state, { type: 'ENTER_RESEARCH_COMPLEX' })
+    state = gameReducer(state, { type: 'ENTER_PEOPLE_GALLERY' })
+    expect(state.screen).toBe('PEOPLE_MAP')
+    expect(state.peopleSpawn).toBe('people-from-events')
+    state = gameReducer(state, { type: 'RETURN_TO_HISTORY_EVENTS' })
+    expect(state.screen).toBe('HISTORY_MAP')
+    expect(state.historySpawn).toBe('history-events-from-people')
+    state = gameReducer(state, { type: 'RETURN_TO_HUB_FROM_HISTORY' })
+    expect(state.screen).toBe('HUB')
+    expect(state.hubSpawn).toBe('hub-from-history')
+    state = gameReducer(state, { type: 'ENTER_RESEARCH_ROUTE' })
     expect(state.screen).toBe('RESEARCH_MAP')
-    expect(state.researchSpawn).toBe('research-from-history')
+    expect(state.researchSpawn).toBe('research-from-hub')
     expect(state.save.worldProgress.researchVisited).toBe(true)
     state = gameReducer(state, { type: 'REACH_FINAL_GATE' })
     expect(state.screen).toBe('RESEARCH_MAP')
     expect(state.save.worldProgress.finalGateReached).toBe(true)
-    state = gameReducer(state, { type: 'RETURN_TO_HISTORY' })
-    expect(state.screen).toBe('HISTORY_MAP')
-    expect(state.historySpawn).toBe('history-from-research')
-    state = gameReducer(state, { type: 'RETURN_TO_HUB' })
+    state = gameReducer(state, { type: 'RETURN_TO_HUB_FROM_RESEARCH' })
     expect(state.screen).toBe('HUB')
-    expect(state.hubSpawn).toBe('hub-from-history')
+    expect(state.hubSpawn).toBe('hub-from-research')
   })
 
   it('keeps the East Gate route locked until the Deep Learning Lab is complete', () => {
     let state = createInitialState(null)
     state = { ...state, screen: 'HUB' }
     state = gameReducer(state, { type: 'ENTER_RESEARCH_ROUTE' })
-    expect(state.screen).toBe('HUB')
-    state = gameReducer(state, { type: 'ENTER_RESEARCH_COMPLEX' })
     expect(state.screen).toBe('HUB')
     state = gameReducer(state, { type: 'OPEN_RESEARCH' })
     expect(state.screen).toBe('HUB')
@@ -123,7 +129,7 @@ describe('Project Origin navigation state machine', () => {
     expect(state.screen).toBe('HUB')
   })
 
-  it('requires the Hall route before entering Research and never auto-starts an ending at the Final Gate', () => {
+  it('keeps History and Research as independent Hub branches and never auto-starts an ending at the Final Gate', () => {
     let state = createInitialState(null)
     state = {
       ...state,
@@ -131,11 +137,11 @@ describe('Project Origin navigation state machine', () => {
       save: { ...state.save, completedLabs: { cv: true, ml: true, nlp: true, dl: true } },
     }
 
-    state = gameReducer(state, { type: 'ENTER_RESEARCH_COMPLEX' })
+    state = gameReducer(state, { type: 'ENTER_HISTORY_ROUTE' })
+    expect(state.screen).toBe('HISTORY_MAP')
+    state = gameReducer(state, { type: 'RETURN_TO_HUB_FROM_HISTORY' })
     expect(state.screen).toBe('HUB')
     state = gameReducer(state, { type: 'ENTER_RESEARCH_ROUTE' })
-    expect(state.screen).toBe('HISTORY_MAP')
-    state = gameReducer(state, { type: 'ENTER_RESEARCH_COMPLEX' })
     expect(state.screen).toBe('RESEARCH_MAP')
     state = gameReducer(state, { type: 'REACH_FINAL_GATE' })
 
@@ -157,14 +163,14 @@ describe('Project Origin navigation state machine', () => {
           ...state.save.worldProgress,
           hallVisited: true,
           lastMap: 'history',
-          lastSpawn: 'history-from-research',
+          lastSpawn: 'history-events-from-people',
         },
       },
     }
 
     state = gameReducer(state, { type: 'CONTINUE_GAME' })
     expect(state.screen).toBe('HISTORY_MAP')
-    expect(state.historySpawn).toBe('history-from-research')
+    expect(state.historySpawn).toBe('history-events-from-people')
   })
 
   it('returns from the Hub to the title without losing the current save', () => {

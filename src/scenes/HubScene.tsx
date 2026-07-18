@@ -1,19 +1,26 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { playTone } from '../audio/audio'
+import { InteractionPrompt } from '../components/InteractionPrompt'
 import { PixelRobot } from '../components/PixelRobot'
 import { VirtualControls } from '../components/VirtualControls'
-import { HUB_BOUNDS, HUB_EAST_TRANSITION_X, HUB_SPAWNS, HUB_TARGETS, type HubTarget } from '../data/maps'
+import { VoiceParticles } from '../components/VoiceParticles'
+import {
+  HUB_BOUNDS,
+  HUB_EAST_TRANSITION_MAX_Y,
+  HUB_EAST_TRANSITION_MIN_Y,
+  HUB_EAST_TRANSITION_X,
+  HUB_SOUTH_TRANSITION_MAX_X,
+  HUB_SOUTH_TRANSITION_MIN_X,
+  HUB_SOUTH_TRANSITION_Y,
+  HUB_SPAWNS,
+  HUB_TARGETS,
+} from '../data/maps'
 import { useGame } from '../game/GameContext'
+import { sameActiveInteractable, selectActiveInteractable, type ActiveInteractable, type InteractionCandidate } from '../game/interactions'
 import { allLabsComplete, foundationsComplete } from '../game/reducer'
 import type { LabId, Point } from '../game/types'
 import { usePlayerMovement } from '../hooks/usePlayerMovement'
-import { useVoiceExpression } from '../hooks/useVoiceExpression'
-
-const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y)
-
-function nearestTarget(position: Point): HubTarget {
-  return HUB_TARGETS.reduce((best, target) => distance(position, target.position) < distance(position, best.position) ? target : best)
-}
+import { isVoiceAbilityAvailable, useVoiceExpression } from '../hooks/useVoiceExpression'
 
 export function HubScene() {
   const { state, dispatch } = useGame()
@@ -21,75 +28,116 @@ export function HubScene() {
   const learningRestored = state.save.completedLabs.ml
   const languageRestored = state.save.completedLabs.nlp
   const dlOnline = foundationsComplete(state.save)
-  const researchPowered = allLabsComplete(state.save)
+  const routesPowered = allLabsComplete(state.save)
   const foundationStatus = `CV ${state.save.completedLabs.cv ? 'OK' : '--'} / ML ${state.save.completedLabs.ml ? 'OK' : '--'} / NLP ${state.save.completedLabs.nlp ? 'OK' : '--'}`
-  const defaultPrompt = dayUnlocked ? 'Explore the awakened academy' : 'The academy is quiet. Follow the lit paths.'
-  const [prompt, setPrompt] = useState(defaultPrompt)
   const transitioned = useRef(false)
   const spawn = HUB_SPAWNS[state.hubSpawn]
-  const voice = useVoiceExpression(languageRestored, state.save.audioEnabled)
+  const voiceAvailable = isVoiceAbilityAvailable(languageRestored, true)
+  const voice = useVoiceExpression(voiceAvailable, state.save.audioEnabled)
+
+  const candidates = useMemo<readonly InteractionCandidate[]>(() => HUB_TARGETS.map((target) => {
+    if (target.id === 'east-gate') return {
+      ...target,
+      id: 'east-gate',
+      type: 'transition' as const,
+      priority: 90,
+      actionLabel: routesPowered ? 'Enter Research Complex' : 'East Gate requires DL',
+    }
+    if (target.id === 'history-gate') return {
+      ...target,
+      id: 'history-gate',
+      type: 'transition' as const,
+      priority: 90,
+      actionLabel: 'Enter AI History Archive',
+    }
+    if (target.id === 'dl') return {
+      ...target,
+      id: 'lab-dl',
+      type: 'lab' as const,
+      priority: 70,
+      actionLabel: dlOnline ? 'Enter DL Lab' : 'DL Lab requires CV, ML and NLP',
+    }
+    return {
+      ...target,
+      id: `lab-${target.id}`,
+      type: 'lab' as const,
+      priority: 70,
+      actionLabel: `Enter ${target.id.toUpperCase()} Lab`,
+    }
+  }), [dlOnline, routesPowered])
+
+  const [activeInteractable, setActiveInteractable] = useState<ActiveInteractable | null>(() => (
+    selectActiveInteractable(spawn.position, candidates)
+  ))
+
+  const setActiveForPosition = useCallback((position: Point) => {
+    const next = selectActiveInteractable(position, candidates)
+    setActiveInteractable((current) => sameActiveInteractable(current, next) ? current : next)
+  }, [candidates])
+
+  const enterHistoryRoute = useCallback(() => {
+    if (transitioned.current) return
+    transitioned.current = true
+    setActiveInteractable(null)
+    playTone(state.save.audioEnabled, 'confirm')
+    dispatch({ type: 'ENTER_HISTORY_ROUTE' })
+  }, [dispatch, state.save.audioEnabled])
 
   const enterResearchRoute = useCallback(() => {
     if (transitioned.current) return
-    if (!researchPowered) {
+    if (!routesPowered) {
       playTone(state.save.audioEnabled, 'incorrect')
-      setPrompt('EAST GATE REQUIRES THE DEEP LEARNING MODULE')
       return
     }
     transitioned.current = true
+    setActiveInteractable(null)
     playTone(state.save.audioEnabled, 'confirm')
     dispatch({ type: 'ENTER_RESEARCH_ROUTE' })
-  }, [dispatch, researchPowered, state.save.audioEnabled])
+  }, [dispatch, routesPowered, state.save.audioEnabled])
 
-  const updatePrompt = useCallback((position: Point) => {
-    if (position.x >= HUB_EAST_TRANSITION_X && position.y >= 238 && position.y <= 356) {
-      if (researchPowered) enterResearchRoute()
-      else setPrompt('EAST GATE REQUIRES THE DEEP LEARNING MODULE')
+  const updatePosition = useCallback((position: Point) => {
+    if (
+      position.x >= HUB_EAST_TRANSITION_X
+      && position.y >= HUB_EAST_TRANSITION_MIN_Y
+      && position.y <= HUB_EAST_TRANSITION_MAX_Y
+    ) {
+      if (routesPowered) enterResearchRoute()
+      else setActiveForPosition(position)
       return
     }
+    if (
+      position.y >= HUB_SOUTH_TRANSITION_Y
+      && position.x >= HUB_SOUTH_TRANSITION_MIN_X
+      && position.x <= HUB_SOUTH_TRANSITION_MAX_X
+    ) {
+      enterHistoryRoute()
+      return
+    }
+    setActiveForPosition(position)
+  }, [enterHistoryRoute, enterResearchRoute, routesPowered, setActiveForPosition])
 
-    const target = nearestTarget(position)
-    let nextPrompt = defaultPrompt
-    if (distance(position, target.position) <= target.interactionRadius) {
-      if (target.id === 'east-gate') nextPrompt = researchPowered ? 'East route online — press E to travel' : 'East Gate sealed — Deep Learning module required'
-      else if (target.id === 'dl') nextPrompt = dlOnline ? 'Press E to enter DL Lab' : `THREE FOUNDATIONAL MODULES REQUIRED — ${foundationStatus}`
-      else nextPrompt = `Press E to enter ${target.id.toUpperCase()} Lab`
-    }
-    setPrompt((current) => current === nextPrompt ? current : nextPrompt)
-  }, [defaultPrompt, dlOnline, enterResearchRoute, foundationStatus, researchPowered])
+  const interact = useCallback(() => {
+    if (!activeInteractable || transitioned.current) return
+    if (activeInteractable.id === 'east-gate') return enterResearchRoute()
+    if (activeInteractable.id === 'history-gate') return enterHistoryRoute()
 
-  const interact = useCallback((position: Point) => {
-    const target = nearestTarget(position)
-    if (distance(position, target.position) > target.interactionRadius) {
-      setPrompt('Move closer to a lab door or campus gate')
+    const lab = activeInteractable.id.replace('lab-', '') as LabId
+    if (lab === 'dl' && !dlOnline) {
+      playTone(state.save.audioEnabled, 'incorrect')
       return
     }
-    if (target.id === 'east-gate') {
-      enterResearchRoute()
-      return
-    }
-    if (target.id === 'dl') {
-      if (dlOnline) {
-        playTone(state.save.audioEnabled, 'confirm')
-        dispatch({ type: 'ENTER_LAB', lab: 'dl' })
-      } else {
-        playTone(state.save.audioEnabled, 'incorrect')
-        setPrompt(`THREE FOUNDATIONAL MODULES REQUIRED — ${foundationStatus}`)
-      }
-      return
-    }
-    playTone(state.save.audioEnabled)
-    dispatch({ type: 'ENTER_LAB', lab: target.id })
-  }, [dispatch, dlOnline, enterResearchRoute, foundationStatus, state.save.audioEnabled])
+    playTone(state.save.audioEnabled, 'confirm')
+    dispatch({ type: 'ENTER_LAB', lab })
+  }, [activeInteractable, dispatch, dlOnline, enterHistoryRoute, enterResearchRoute, state.save.audioEnabled])
 
   const movement = usePlayerMovement({
-    active: true,
+    active: !transitioned.current,
     initialPosition: spawn.position,
     initialDirection: spawn.direction,
     bounds: HUB_BOUNDS,
     speed: 155,
     audioEnabled: state.save.audioEnabled,
-    onPositionChange: updatePrompt,
+    onPositionChange: updatePosition,
     onInteract: interact,
   })
 
@@ -98,7 +146,7 @@ export function HubScene() {
     dayUnlocked ? 'is-day' : 'is-night',
     learningRestored ? 'has-learning' : '',
     languageRestored ? 'has-language' : '',
-    researchPowered ? 'research-route-active' : '',
+    routesPowered ? 'research-route-active' : '',
   ].filter(Boolean).join(' ')
 
   return (
@@ -133,9 +181,11 @@ export function HubScene() {
           <span>{languageRestored ? 'EAST' : 'E_ST'}</span><b aria-hidden="true">›</b>
           <div className="gate-beacon"><i /></div>
         </div>
+        <div className="history-south-gate" aria-label="South gate to the AI History Archive"><i /><span>HISTORY</span><b>↓</b><i /></div>
 
         <AcademySign className="sign-plaza" decoded={languageRestored} text="CENTRAL QUAD" cipher="C?NTR_L // QD" />
         <AcademySign className="sign-route" decoded={languageRestored} text="RESEARCH →" cipher="R?S_//CH →" />
+        <AcademySign className="sign-history" decoded={languageRestored} text="HISTORY ↓" cipher="H?ST_RY ↓" />
 
         <CampusTree className="tree-nw" /><CampusTree className="tree-n" /><CampusTree className="tree-ne" />
         <CampusTree className="tree-w" /><CampusTree className="tree-se" /><CampusTree className="tree-s" />
@@ -149,20 +199,21 @@ export function HubScene() {
         <div className="system-conduit conduit-one" /><div className="system-conduit conduit-two" />
 
         <div ref={movement.playerRef} className="player-on-map" style={movement.playerStyle} data-player-direction={movement.direction}>
-          {voice.expression && <span key={voice.expression.id} className="voice-note-bubble">♪ {voice.expression.note}</span>}
+          <VoiceParticles expression={voice.expression} />
           <PixelRobot direction={movement.direction} walking={movement.walking} visionUpgraded={dayUnlocked} learningUpgraded={learningRestored} communicationUpgraded={languageRestored} deepLearningUpgraded={state.save.completedLabs.dl} />
         </div>
       </div>
 
       <div className="map-action-hints">
-        <div className="interaction-prompt"><span>E</span>{prompt}</div>
-        {languageRestored && <div className="voice-prompt"><span>F</span>VOICE</div>}
+        <InteractionPrompt active={activeInteractable} />
+        {voiceAvailable && <div className="voice-prompt"><span>F</span>VOICE</div>}
       </div>
       <VirtualControls
         onDirectionChange={movement.input.setDirection}
         onReset={movement.input.resetDirections}
-        onInteract={() => interact(movement.positionRef.current)}
-        onExpress={languageRestored ? voice.express : undefined}
+        onInteract={activeInteractable ? interact : undefined}
+        interactionLabel={activeInteractable?.actionLabel}
+        onExpress={voiceAvailable ? voice.express : undefined}
       />
     </div>
   )

@@ -16,8 +16,8 @@ This is a playable introduction to artificial intelligence, not a traditional co
 - Expected playtime: 20-30 minutes.
 - Language: English only for the MVP.
 - Learning principle: let the player perform an activity first. Explain the concept only after completion.
-- MVP labs: Computer Vision, Machine Learning, Natural Language Processing, and a locked Research Lab.
-- Deep Learning is not part of the MVP.
+- Playable labs: Computer Vision, Machine Learning, Natural Language Processing, and Deep Learning.
+- Research is a separate exploration branch with sealed future modules and ARCHIVE ZERO; it is not a fifth Lab or the final ending in this phase.
 
 ## Non-negotiable constraints
 
@@ -25,7 +25,7 @@ This is a playable introduction to artificial intelligence, not a traditional co
 - Support desktop and mobile. Mobile gameplay is landscape only.
 - Desktop movement: WASD or arrow keys.
 - Desktop interaction: Enter, E, or Space.
-- Mobile input: virtual D-pad and one large interaction button.
+- Mobile input: virtual D-pad, one contextual interaction button, and a persistent Voice button after NLP completion.
 - Desktop and touch movement is continuous while a direction remains held, uses delta-time normalization, and resets on focus or visibility loss.
 - No backend, accounts, AI API, 3D, game engine, remote image assets, coins, inventory, health, combat, character levels, or copyrighted game assets.
 - Store progress in localStorage.
@@ -50,10 +50,18 @@ This is a playable introduction to artificial intelligence, not a traditional co
 {
   playerName: string
   introCompleted: boolean
-  completedLabs: { cv: boolean; ml: boolean; nlp: boolean }
-  stageProgress: { cv: number; ml: number; nlp: number }
+  completedLabs: { cv: boolean; ml: boolean; nlp: boolean; dl: boolean }
+  stageProgress: { cv: number; ml: number; nlp: number; dl: number }
   achievements: string[]
   audioEnabled: boolean
+  worldProgress: {
+    hallVisited: boolean
+    researchVisited: boolean
+    finalGateReached: boolean
+    readExhibitIds: string[]
+    lastMap: 'hub' | 'history' | 'people' | 'research'
+    lastSpawn: string
+  }
 }
 ```
 
@@ -106,9 +114,46 @@ Mentors appear in dialogue only.
 
 ## Academy hub and interiors
 
-Build one tiny hub with a central plaza, three accessible labs, a locked Research Lab, trees, lamps, signs, and academy technology. Labs can be entered in any order. The Research Lab unlocks only after all three labs are completed. Do not add quests, roaming NPCs, item collection, large maps, complex collision, or multiple floors.
+Build one tiny hub with a central plaza and four Lab buildings: CV, ML, NLP, and foundation-gated DL. CV, ML, and NLP can be entered in any order. DL becomes available after all three foundations are restored. Research is not a Hub building. Do not add roaming NPCs, item collection, large maps, complex collision, or multiple floors.
 
-Each tiny lab interior lets the player walk to a terminal, interact, meet the mentor, and begin ordered learning stages. The Computer Vision Lab is fully playable. Machine Learning and Natural Language Processing retain placeholder activities until their dedicated implementation passes.
+Each tiny Lab interior lets the player walk to a terminal, read two optional side exhibits, meet the mentor, and begin ordered learning stages. CV, ML, NLP, and DL each contain four completed sequential activities with persisted stage progress and replay support.
+
+## World navigation and history archive
+
+The Academy Hub owns two independent branches. Walking east from the Hub reaches the Research Lab Complex after all four Labs are restored. Walking south reaches the optional AI History Events map and does not gate Research. Continuing south from History Events reaches the separate People of AI Gallery.
+
+```text
+Hub --east--> Research Lab Complex
+ |
+ south
+ v
+AI History Events
+ |
+ south
+ v
+People of AI Gallery
+```
+
+- History Events contains exactly 12 chronological event terminals: 1950, 1956, 1959, 1966, 1986, 1997, 2009, 2012, 2016, 2017, 2022, and 2023.
+- People Gallery contains eight contributor records and the community-framed Modern Builders display. It never leads to Research.
+- Every map boundary uses centralized named spawns. Arrivals face away from the boundary and begin outside its immediate trigger.
+- Lab, exhibit, People, Research, Final Gate, and transition interactions are optional unless explicitly required for Lab progression.
+
+## Contextual interaction and communication HUD
+
+- One centralized `activeInteractable` selection chooses the nearest in-range target, then uses priority and ID for deterministic ties.
+- E, Enter, Space, and the mobile interaction button all execute that same active target.
+- The E prompt and touch interaction button do not render in empty space or while a blocking panel is open.
+- Completing NLP permanently unlocks the F Voice ability on Hub, History Events, People Gallery, and Research exploration maps.
+- Voice chooses do, re, mi, fa, or so, creates pixel music particles above the robot, respects the audio setting, and uses a 550 ms anti-spam cooldown.
+
+## Mobile immersion and installation
+
+- Detect touch-oriented mobile conditions from pointer, hover, touch-point, and viewport signals rather than user-agent text alone.
+- A non-standalone mobile browser shows an explicit full-screen preparation gate before play. Fullscreen is requested only after the player presses its button.
+- Unsupported or rejected fullscreen requests expose Install App and Continue in Browser fallbacks. Fullscreen exit clears held input, pauses exploration in place, and offers re-entry or browser continuation without resetting progress.
+- Installed standalone mode skips the preparation gate but keeps the portrait rotation guard and safe-area handling.
+- The production build includes a standalone web manifest, 192 px and 512 px icons, service worker, and an offline application shell. The game has no API response cache.
 
 ## Computer Vision Lab
 
@@ -121,15 +166,15 @@ The Computer Vision Lab is a four-stage sequential module led by LENS-01. The fi
 
 CV progress uses `stageProgress.cv` values from 0 through 4. Each successfully completed activity is persisted immediately. Leaving or reloading resumes at the next incomplete stage. Completing the boss sets `completedLabs.cv`, unlocks `MACHINES_FIRST_SIGHT`, adds the protagonist eye upgrade, and returns the player outside the CV Lab door through the existing named spawn-point system.
 
-## First implementation pass
+## Implemented foundation
 
 - Project architecture and this specification.
 - Title screen and save-aware continuation.
 - Mandatory timed intro and name entry.
 - Responsive frame, landscape handling, keyboard controls, and virtual controls.
-- Walkable academy hub and three small lab interiors.
-- Locked Research Lab door.
+- Walkable academy hub and four small Lab interiors.
+- Independent south History/People branch and gated east Research branch.
 - Reusable dialogue system.
 - localStorage save/continue.
 - Complete Computer Vision Lab stages.
-- Placeholder stage screens remain for Machine Learning and Natural Language Processing.
+- Complete CV, ML, NLP, and DL stage sequences.

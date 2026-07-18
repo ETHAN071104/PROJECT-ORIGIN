@@ -9,8 +9,9 @@ export function createInitialState(stored: SaveData | null): GameState {
     dialogueKey: null,
     hasStoredSave: Boolean(stored?.introCompleted && stored.playerName),
     hubSpawn: 'hub-default',
-    historySpawn: 'history-from-academy',
-    researchSpawn: 'research-from-history',
+    historySpawn: 'history-events-from-hub',
+    peopleSpawn: 'people-from-events',
+    researchSpawn: 'research-from-hub',
   }
 }
 
@@ -37,15 +38,24 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
     case 'CONTINUE_GAME':
       if (!state.hasStoredSave) return state
-      if (allLabsComplete(state.save) && state.save.worldProgress.lastMap === 'history') {
+      if (state.save.worldProgress.lastMap === 'history') {
         return {
           ...state,
           screen: 'HISTORY_MAP',
           currentLab: null,
           dialogueKey: null,
-          historySpawn: state.save.worldProgress.lastSpawn === 'history-from-research'
-            ? 'history-from-research'
-            : 'history-from-academy',
+          historySpawn: state.save.worldProgress.lastSpawn === 'history-events-from-people'
+            ? 'history-events-from-people'
+            : 'history-events-from-hub',
+        }
+      }
+      if (state.save.worldProgress.lastMap === 'people') {
+        return {
+          ...state,
+          screen: 'PEOPLE_MAP',
+          currentLab: null,
+          dialogueKey: null,
+          peopleSpawn: 'people-from-events',
         }
       }
       if (allLabsComplete(state.save) && state.save.worldProgress.lastMap === 'research') {
@@ -54,7 +64,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           screen: 'RESEARCH_MAP',
           currentLab: null,
           dialogueKey: null,
-          researchSpawn: 'research-from-history',
+          researchSpawn: 'research-from-hub',
         }
       }
       return {
@@ -280,37 +290,48 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           state.currentLab ? `hub-from-${state.currentLab}` : state.hubSpawn,
         ),
       }
-    case 'ENTER_RESEARCH_ROUTE':
-      if (!allLabsComplete(state.save)) return state
+    case 'ENTER_HISTORY_ROUTE':
+      if (state.screen !== 'HUB') return state
       return {
         ...state,
         screen: 'HISTORY_MAP',
         currentLab: null,
         dialogueKey: null,
-        historySpawn: 'history-from-academy',
-        save: atWorldLocation(state.save, 'history', 'history-from-academy', { hallVisited: true }),
+        historySpawn: 'history-events-from-hub',
+        save: atWorldLocation(state.save, 'history', 'history-events-from-hub', { hallVisited: true }),
       }
-    case 'ENTER_RESEARCH_COMPLEX':
-      if (!allLabsComplete(state.save) || state.screen !== 'HISTORY_MAP') return state
+    case 'ENTER_PEOPLE_GALLERY':
+      if (state.screen !== 'HISTORY_MAP') return state
+      return {
+        ...state,
+        screen: 'PEOPLE_MAP',
+        currentLab: null,
+        dialogueKey: null,
+        peopleSpawn: 'people-from-events',
+        save: atWorldLocation(state.save, 'people', 'people-from-events', { hallVisited: true }),
+      }
+    case 'RETURN_TO_HISTORY_EVENTS':
+      if (state.screen !== 'PEOPLE_MAP') return state
+      return {
+        ...state,
+        screen: 'HISTORY_MAP',
+        currentLab: null,
+        dialogueKey: null,
+        historySpawn: 'history-events-from-people',
+        save: atWorldLocation(state.save, 'history', 'history-events-from-people', { hallVisited: true }),
+      }
+    case 'ENTER_RESEARCH_ROUTE':
+      if (!allLabsComplete(state.save) || state.screen !== 'HUB') return state
       return {
         ...state,
         screen: 'RESEARCH_MAP',
         currentLab: null,
         dialogueKey: null,
-        researchSpawn: 'research-from-history',
-        save: atWorldLocation(state.save, 'research', 'research-from-history', { researchVisited: true }),
+        researchSpawn: 'research-from-hub',
+        save: atWorldLocation(state.save, 'research', 'research-from-hub', { researchVisited: true }),
       }
-    case 'RETURN_TO_HISTORY':
-      if (!allLabsComplete(state.save) || state.screen !== 'RESEARCH_MAP') return state
-      return {
-        ...state,
-        screen: 'HISTORY_MAP',
-        currentLab: null,
-        dialogueKey: null,
-        historySpawn: 'history-from-research',
-        save: atWorldLocation(state.save, 'history', 'history-from-research', { hallVisited: true }),
-      }
-    case 'RETURN_TO_HUB':
+    case 'RETURN_TO_HUB_FROM_HISTORY':
+      if (state.screen !== 'HISTORY_MAP') return state
       return {
         ...state,
         screen: 'HUB',
@@ -318,6 +339,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         dialogueKey: null,
         hubSpawn: 'hub-from-history',
         save: atWorldLocation(state.save, 'hub', 'hub-from-history'),
+      }
+    case 'RETURN_TO_HUB_FROM_RESEARCH':
+      if (state.screen !== 'RESEARCH_MAP') return state
+      return {
+        ...state,
+        screen: 'HUB',
+        currentLab: null,
+        dialogueKey: null,
+        hubSpawn: 'hub-from-research',
+        save: atWorldLocation(state.save, 'hub', 'hub-from-research'),
       }
     case 'RETURN_TO_TITLE':
       return {

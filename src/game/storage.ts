@@ -64,23 +64,32 @@ export function loadSave(): SaveData | null {
       save.completedLabs.nlp = false
       save.stageProgress.nlp = 0
     }
-    if (!['hub', 'history', 'research'].includes(save.worldProgress.lastMap)) {
+    if (!['hub', 'history', 'people', 'research'].includes(save.worldProgress.lastMap)) {
       save.worldProgress.lastMap = 'hub'
       save.worldProgress.lastSpawn = 'hub-default'
     }
+    // Migrate the former Hub -> Hall -> Research corridor spawns into the new
+    // Hub-centered branches without discarding completed Labs or read records.
+    const legacySpawn = save.worldProgress.lastSpawn as string
+    if (legacySpawn === 'hub-from-east-gate') save.worldProgress.lastSpawn = 'hub-from-research'
+    if (legacySpawn === 'history-from-academy') save.worldProgress.lastSpawn = 'history-events-from-hub'
+    if (legacySpawn === 'history-from-research') save.worldProgress.lastSpawn = 'history-events-from-people'
+    if (legacySpawn === 'research-from-history') save.worldProgress.lastSpawn = 'research-from-hub'
     if (save.worldProgress.lastMap === 'hub' && ![
-      'hub-default', 'hub-from-cv', 'hub-from-ml', 'hub-from-nlp', 'hub-from-dl', 'hub-from-east-gate', 'hub-from-history',
+      'hub-default', 'hub-from-cv', 'hub-from-ml', 'hub-from-nlp', 'hub-from-dl', 'hub-from-history', 'hub-from-research',
     ].includes(save.worldProgress.lastSpawn)) save.worldProgress.lastSpawn = 'hub-default'
     if (save.worldProgress.lastMap === 'history' && ![
-      'history-from-academy', 'history-from-research',
-    ].includes(save.worldProgress.lastSpawn)) save.worldProgress.lastSpawn = 'history-from-academy'
-    if (save.worldProgress.lastMap === 'research') save.worldProgress.lastSpawn = 'research-from-history'
+      'history-events-from-hub', 'history-events-from-people',
+    ].includes(save.worldProgress.lastSpawn)) save.worldProgress.lastSpawn = 'history-events-from-hub'
+    if (save.worldProgress.lastMap === 'people') save.worldProgress.lastSpawn = 'people-from-events'
+    if (save.worldProgress.lastMap === 'research') save.worldProgress.lastSpawn = 'research-from-hub'
     if (!(save.completedLabs.cv && save.completedLabs.ml && save.completedLabs.nlp && save.completedLabs.dl)) {
-      save.worldProgress.hallVisited = false
       save.worldProgress.researchVisited = false
       save.worldProgress.finalGateReached = false
-      save.worldProgress.lastMap = 'hub'
-      save.worldProgress.lastSpawn = 'hub-default'
+      if (save.worldProgress.lastMap === 'research') {
+        save.worldProgress.lastMap = 'hub'
+        save.worldProgress.lastSpawn = 'hub-default'
+      }
     }
     return save
   } catch {

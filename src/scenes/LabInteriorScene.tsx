@@ -1,70 +1,84 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { playTone } from '../audio/audio'
-import { PixelRobot } from '../components/PixelRobot'
 import { HistoryEntryPanel, HistoryExhibit } from '../components/HistoryExhibit'
+import { InteractionPrompt } from '../components/InteractionPrompt'
+import { PixelRobot } from '../components/PixelRobot'
 import { VirtualControls } from '../components/VirtualControls'
 import { LAB_HISTORY_EXHIBITS, type HistoryEntry } from '../data/historyArchive'
 import { labs } from '../data/labs'
-import { LAB_BOUNDS, LAB_CONSOLE_TARGET, LAB_EXHIBIT_TARGETS, LAB_EXIT_Y, LAB_SPAWN } from '../data/maps'
+import { LAB_BOUNDS, LAB_CONSOLE_TARGET, LAB_EXHIBIT_TARGETS, LAB_SPAWN } from '../data/maps'
 import { useGame } from '../game/GameContext'
+import { sameActiveInteractable, selectActiveInteractable, type ActiveInteractable, type InteractionCandidate } from '../game/interactions'
 import type { Point } from '../game/types'
 import { usePlayerMovement } from '../hooks/usePlayerMovement'
 
 export function LabInteriorScene() {
   const { state, dispatch } = useGame()
-  const [prompt, setPrompt] = useState('Approach the console')
   const [activeEntry, setActiveEntry] = useState<HistoryEntry | null>(null)
   const lab = state.currentLab ? labs[state.currentLab] : null
   const exhibits = state.currentLab ? LAB_HISTORY_EXHIBITS[state.currentLab] : null
 
-  const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y)
+  const candidates = useMemo<readonly InteractionCandidate[]>(() => {
+    if (!lab || !exhibits) return []
+    return [
+      {
+        id: 'mentor-console',
+        actionLabel: state.save.completedLabs[lab.id] ? 'Replay Lab Module' : 'Use Mentor Terminal',
+        type: 'terminal',
+        priority: 80,
+        ...LAB_CONSOLE_TARGET,
+      },
+      {
+        id: exhibits[0].id,
+        actionLabel: `Read ${exhibits[0].year}: ${exhibits[0].title}`,
+        type: 'history',
+        priority: 70,
+        ...LAB_EXHIBIT_TARGETS.left,
+      },
+      {
+        id: exhibits[1].id,
+        actionLabel: `Read ${exhibits[1].year}: ${exhibits[1].title}`,
+        type: 'history',
+        priority: 70,
+        ...LAB_EXHIBIT_TARGETS.right,
+      },
+      {
+        id: 'lab-exit',
+        actionLabel: 'Return to Central Plaza',
+        type: 'transition',
+        priority: 100,
+        position: { x: 480, y: 382 },
+        interactionRadius: 48,
+      },
+    ]
+  }, [exhibits, lab, state.save.completedLabs])
 
-  const nearbyExhibit = useCallback((position: Point) => {
-    if (!exhibits) return null
-    const leftDistance = distance(position, LAB_EXHIBIT_TARGETS.left.position)
-    const rightDistance = distance(position, LAB_EXHIBIT_TARGETS.right.position)
-    if (leftDistance <= LAB_EXHIBIT_TARGETS.left.interactionRadius && leftDistance <= rightDistance) {
-      return { entry: exhibits[0], side: 'left' as const }
-    }
-    if (rightDistance <= LAB_EXHIBIT_TARGETS.right.interactionRadius) {
-      return { entry: exhibits[1], side: 'right' as const }
-    }
-    return null
-  }, [exhibits])
+  const [activeInteractable, setActiveInteractable] = useState<ActiveInteractable | null>(() => (
+    selectActiveInteractable(LAB_SPAWN.position, candidates)
+  ))
 
-  const updatePrompt = useCallback((position: Point) => {
-    const exhibit = nearbyExhibit(position)
-    const nextPrompt = position.y > LAB_EXIT_Y
-      ? 'Return to academy'
-      : exhibit
-        ? `Read ${exhibit.entry.year}: ${exhibit.entry.title}`
-        : distance(position, LAB_CONSOLE_TARGET.position) <= LAB_CONSOLE_TARGET.interactionRadius
-          ? 'Activate mentor console'
-          : 'Explore the console or side exhibits'
-    setPrompt((current) => current === nextPrompt ? current : nextPrompt)
-  }, [nearbyExhibit])
+  const updateActive = useCallback((position: Point) => {
+    const next = activeEntry ? null : selectActiveInteractable(position, candidates)
+    setActiveInteractable((current) => sameActiveInteractable(current, next) ? current : next)
+  }, [activeEntry, candidates])
 
-  const interact = useCallback((position: Point) => {
-    if (!lab || !state.currentLab) return
-    if (activeEntry) {
-      setActiveEntry(null)
-      return
-    }
-    playTone(state.save.audioEnabled)
-    if (position.y > LAB_EXIT_Y) {
+  const interact = useCallback(() => {
+    if (!lab || !state.currentLab || !activeInteractable || activeEntry) return
+    playTone(state.save.audioEnabled, 'confirm')
+    if (activeInteractable.id === 'lab-exit') {
       dispatch({ type: 'LEAVE_LAB' })
       return
     }
-    const exhibit = nearbyExhibit(position)
-    if (exhibit) {
-      setActiveEntry(exhibit.entry)
-      dispatch({ type: 'READ_HISTORY_ENTRY', id: exhibit.entry.id })
+    if (activeInteractable.id === 'mentor-console') {
+      dispatch({ type: 'START_DIALOGUE', key: `${state.currentLab}-intro` })
       return
     }
-    if (distance(position, LAB_CONSOLE_TARGET.position) <= LAB_CONSOLE_TARGET.interactionRadius) {
-      dispatch({ type: 'START_DIALOGUE', key: `${state.currentLab}-intro` })
-    } else setPrompt('Move closer to the center console or a side exhibit')
-  }, [activeEntry, dispatch, lab, nearbyExhibit, state.currentLab, state.save.audioEnabled])
+    const entry = exhibits?.find((item) => item.id === activeInteractable.id)
+    if (!entry) return
+    setActiveEntry(entry)
+    setActiveInteractable(null)
+    dispatch({ type: 'READ_HISTORY_ENTRY', id: entry.id })
+  }, [activeEntry, activeInteractable, dispatch, exhibits, lab, state.currentLab, state.save.audioEnabled])
 
   const movement = usePlayerMovement({
     active: Boolean(lab) && !activeEntry,
@@ -73,9 +87,14 @@ export function LabInteriorScene() {
     bounds: LAB_BOUNDS,
     speed: 165,
     audioEnabled: state.save.audioEnabled,
-    onPositionChange: updatePrompt,
+    onPositionChange: updateActive,
     onInteract: interact,
   })
+
+  const closeEntry = useCallback(() => {
+    setActiveEntry(null)
+    setActiveInteractable(selectActiveInteractable(movement.positionRef.current, candidates))
+  }, [candidates, movement.positionRef])
 
   if (!lab) return null
 
@@ -104,17 +123,18 @@ export function LabInteriorScene() {
           <PixelRobot direction={movement.direction} walking={movement.walking} visionUpgraded={state.save.completedLabs.cv} learningUpgraded={state.save.completedLabs.ml} communicationUpgraded={state.save.completedLabs.nlp} deepLearningUpgraded={state.save.completedLabs.dl} />
         </div>
       </div>
-      <div className="interaction-prompt"><span>E</span>{prompt}</div>
+      <InteractionPrompt active={activeEntry ? null : activeInteractable} />
       <VirtualControls
         onDirectionChange={movement.input.setDirection}
         onReset={movement.input.resetDirections}
-        onInteract={() => interact(movement.positionRef.current)}
+        onInteract={!activeEntry && activeInteractable ? interact : undefined}
+        interactionLabel={activeInteractable?.actionLabel}
       />
       {activeEntry && (
         <HistoryEntryPanel
           entry={activeEntry}
           align={activeEntry === exhibits?.[0] ? 'right' : 'left'}
-          onClose={() => setActiveEntry(null)}
+          onClose={closeEntry}
         />
       )}
     </div>

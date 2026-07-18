@@ -17,3 +17,11 @@ createRoot(document.getElementById('root')!).render(
     </GameProvider>
   </StrictMode>,
 )
+
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Installation remains optional; the online game should still launch.
+    })
+  })
+}

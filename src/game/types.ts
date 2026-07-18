@@ -1,9 +1,10 @@
 export type LabId = 'cv' | 'ml' | 'nlp' | 'dl'
-export type HubSpawnId = 'hub-default' | 'hub-from-cv' | 'hub-from-ml' | 'hub-from-nlp' | 'hub-from-dl' | 'hub-from-east-gate' | 'hub-from-history'
-export type HistorySpawnId = 'history-from-academy' | 'history-from-research'
-export type ResearchSpawnId = 'research-from-history'
-export type WorldMapId = 'hub' | 'history' | 'research'
-export type WorldSpawnId = HubSpawnId | HistorySpawnId | ResearchSpawnId
+export type HubSpawnId = 'hub-default' | 'hub-from-cv' | 'hub-from-ml' | 'hub-from-nlp' | 'hub-from-dl' | 'hub-from-history' | 'hub-from-research'
+export type HistorySpawnId = 'history-events-from-hub' | 'history-events-from-people'
+export type PeopleSpawnId = 'people-from-events'
+export type ResearchSpawnId = 'research-from-hub'
+export type WorldMapId = 'hub' | 'history' | 'people' | 'research'
+export type WorldSpawnId = HubSpawnId | HistorySpawnId | PeopleSpawnId | ResearchSpawnId
 
 export type GameScreen =
   | 'TITLE'
@@ -11,6 +12,7 @@ export type GameScreen =
   | 'NAME_ENTRY'
   | 'HUB'
   | 'HISTORY_MAP'
+  | 'PEOPLE_MAP'
   | 'RESEARCH_MAP'
   | 'LAB_INTERIOR'
   | 'DIALOGUE'
@@ -59,6 +61,7 @@ export interface GameState {
   hasStoredSave: boolean
   hubSpawn: HubSpawnId
   historySpawn: HistorySpawnId
+  peopleSpawn: PeopleSpawnId
   researchSpawn: ResearchSpawnId
 }
 
@@ -85,10 +88,12 @@ export type GameAction =
   | { type: 'COMPLETE_DL_LAB' }
   | { type: 'FINISH_DL_LAB' }
   | { type: 'ACKNOWLEDGE_LAB_COMPLETE' }
+  | { type: 'ENTER_HISTORY_ROUTE' }
+  | { type: 'ENTER_PEOPLE_GALLERY' }
+  | { type: 'RETURN_TO_HISTORY_EVENTS' }
   | { type: 'ENTER_RESEARCH_ROUTE' }
-  | { type: 'ENTER_RESEARCH_COMPLEX' }
-  | { type: 'RETURN_TO_HISTORY' }
-  | { type: 'RETURN_TO_HUB' }
+  | { type: 'RETURN_TO_HUB_FROM_HISTORY' }
+  | { type: 'RETURN_TO_HUB_FROM_RESEARCH' }
   | { type: 'RETURN_TO_TITLE' }
   | { type: 'OPEN_RESEARCH' }
   | { type: 'READ_HISTORY_ENTRY'; id: string }

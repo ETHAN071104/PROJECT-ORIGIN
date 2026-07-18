@@ -1,18 +1,22 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { playTone } from '../audio/audio'
+import { InteractionPrompt } from '../components/InteractionPrompt'
 import { PixelRobot } from '../components/PixelRobot'
 import { VirtualControls } from '../components/VirtualControls'
+import { VoiceParticles } from '../components/VoiceParticles'
 import {
   RESEARCH_BOUNDS,
   RESEARCH_FINAL_GATE,
   RESEARCH_FUTURE_DOORS,
   RESEARCH_SPAWNS,
+  RESEARCH_WEST_TRANSITION_MIN_Y,
   RESEARCH_WEST_TRANSITION_X,
 } from '../data/maps'
 import { useGame } from '../game/GameContext'
+import { sameActiveInteractable, selectActiveInteractable, type ActiveInteractable, type InteractionCandidate } from '../game/interactions'
 import type { Point } from '../game/types'
 import { usePlayerMovement } from '../hooks/usePlayerMovement'
-import { useVoiceExpression } from '../hooks/useVoiceExpression'
+import { isVoiceAbilityAvailable, useVoiceExpression } from '../hooks/useVoiceExpression'
 
 const FUTURE_MODULES = [
   {
@@ -44,7 +48,14 @@ const FUTURE_MODULES = [
 type FutureModule = typeof FUTURE_MODULES[number]
 type ActivePanel = { kind: 'module'; module: FutureModule; align: 'left' | 'right' } | { kind: 'gate'; align: 'left' | 'right' }
 
-const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y)
+const WEST_EXIT: InteractionCandidate = {
+  id: 'research-to-hub',
+  actionLabel: 'Return to Central Plaza',
+  type: 'transition',
+  priority: 100,
+  position: { x: 92, y: 350 },
+  interactionRadius: 54,
+}
 
 function usePanelKeys(onClose: () => void) {
   useEffect(() => {
@@ -92,72 +103,88 @@ function FinalGatePanel({ align, onClose }: { align: 'left' | 'right'; onClose: 
 
 export function ResearchMapScene() {
   const { state, dispatch } = useGame()
-  const [prompt, setPrompt] = useState('Proceed through the future module corridor')
   const [activePanel, setActivePanel] = useState<ActivePanel | null>(null)
   const transitioned = useRef(false)
   const spawn = RESEARCH_SPAWNS[state.researchSpawn]
-  const voice = useVoiceExpression(state.save.completedLabs.nlp && !activePanel, state.save.audioEnabled)
+  const languageRestored = state.save.completedLabs.nlp
+  const voiceAvailable = isVoiceAbilityAvailable(languageRestored, !activePanel)
+  const voice = useVoiceExpression(voiceAvailable, state.save.audioEnabled)
 
-  const returnToHistory = useCallback(() => {
+  const candidates = useMemo<readonly InteractionCandidate[]>(() => [
+    WEST_EXIT,
+    ...RESEARCH_FUTURE_DOORS.map((door) => {
+      const module = FUTURE_MODULES.find((item) => item.id === door.id)!
+      return {
+        ...door,
+        id: `future-${door.id}`,
+        actionLabel: `Inspect ${module.title}`,
+        type: 'research-door' as const,
+        priority: 70,
+      }
+    }),
+    {
+      ...RESEARCH_FINAL_GATE,
+      id: 'archive-zero',
+      actionLabel: 'Examine ARCHIVE ZERO',
+      type: 'gate' as const,
+      priority: 90,
+    },
+  ], [])
+  const [activeInteractable, setActiveInteractable] = useState<ActiveInteractable | null>(() => (
+    selectActiveInteractable(spawn.position, candidates)
+  ))
+
+  const updateActive = useCallback((position: Point) => {
+    const next = activePanel ? null : selectActiveInteractable(position, candidates)
+    setActiveInteractable((current) => sameActiveInteractable(current, next) ? current : next)
+  }, [activePanel, candidates])
+
+  const returnToHub = useCallback(() => {
     if (transitioned.current) return
     transitioned.current = true
+    setActiveInteractable(null)
     playTone(state.save.audioEnabled, 'confirm')
-    dispatch({ type: 'RETURN_TO_HISTORY' })
+    dispatch({ type: 'RETURN_TO_HUB_FROM_RESEARCH' })
   }, [dispatch, state.save.audioEnabled])
 
-  const updatePrompt = useCallback((position: Point) => {
-    if (position.x <= RESEARCH_WEST_TRANSITION_X && position.y >= 300) {
-      returnToHistory()
-      return
-    }
-    if (distance(position, RESEARCH_FINAL_GATE.position) <= RESEARCH_FINAL_GATE.interactionRadius) {
-      setPrompt('Scan the ARCHIVE ZERO Final Gate')
-      return
-    }
-    const nearDoor = RESEARCH_FUTURE_DOORS.find((door) => distance(position, door.position) <= door.interactionRadius)
-    if (nearDoor) {
-      const module = FUTURE_MODULES.find((item) => item.id === nearDoor.id)
-      setPrompt(module ? `Inspect sealed module: ${module.title}` : 'Inspect sealed future module')
-      return
-    }
-    setPrompt(position.x < 150 ? 'West corridor — return to Hall of Origins' : position.x > 700 ? 'Four restored signals are reacting ahead' : 'Proceed through the future module corridor')
-  }, [returnToHistory])
+  const updatePosition = useCallback((position: Point) => {
+    if (position.x <= RESEARCH_WEST_TRANSITION_X && position.y >= RESEARCH_WEST_TRANSITION_MIN_Y) return returnToHub()
+    updateActive(position)
+  }, [returnToHub, updateActive])
 
-  const interact = useCallback((position: Point) => {
-    if (activePanel) {
-      setActivePanel(null)
-      return
-    }
-    if (position.x < 120 && position.y >= 300) {
-      returnToHistory()
-      return
-    }
-    if (distance(position, RESEARCH_FINAL_GATE.position) <= RESEARCH_FINAL_GATE.interactionRadius) {
+  const interact = useCallback(() => {
+    if (!activeInteractable || activePanel || transitioned.current) return
+    if (activeInteractable.id === WEST_EXIT.id) return returnToHub()
+    if (activeInteractable.id === 'archive-zero') {
       playTone(state.save.audioEnabled, 'complete')
       dispatch({ type: 'REACH_FINAL_GATE' })
       setActivePanel({ kind: 'gate', align: 'left' })
+      setActiveInteractable(null)
       return
     }
-    const door = RESEARCH_FUTURE_DOORS.find((target) => distance(position, target.position) <= target.interactionRadius)
-    const module = door ? FUTURE_MODULES.find((item) => item.id === door.id) : undefined
-    if (!module || !door) {
-      setPrompt('Move closer to a sealed module door or the Final Gate')
-      return
-    }
+    const module = FUTURE_MODULES.find((item) => `future-${item.id}` === activeInteractable.id)
+    if (!module) return
     playTone(state.save.audioEnabled, 'alarm')
+    const door = RESEARCH_FUTURE_DOORS.find((item) => item.id === module.id)!
     setActivePanel({ kind: 'module', module, align: door.position.x < 480 ? 'right' : 'left' })
-  }, [activePanel, dispatch, returnToHistory, state.save.audioEnabled])
+    setActiveInteractable(null)
+  }, [activeInteractable, activePanel, dispatch, returnToHub, state.save.audioEnabled])
 
   const movement = usePlayerMovement({
-    active: !activePanel,
+    active: !activePanel && !transitioned.current,
     initialPosition: spawn.position,
     initialDirection: spawn.direction,
     bounds: RESEARCH_BOUNDS,
     speed: 160,
     audioEnabled: state.save.audioEnabled,
-    onPositionChange: updatePrompt,
+    onPositionChange: updatePosition,
     onInteract: interact,
   })
+
+  const closePanel = useCallback(() => {
+    setActivePanel(null)
+    setActiveInteractable(selectActiveInteractable(movement.positionRef.current, candidates))
+  }, [candidates, movement.positionRef])
 
   return (
     <div className="scene research-map-scene">
@@ -170,7 +197,7 @@ export function ResearchMapScene() {
       <div className="research-map research-complex-map" aria-label="Research Lab Complex with three sealed future modules and the Archive Zero Final Gate">
         <div className="complex-wall-grid" aria-hidden="true" />
         <div className="complex-floor" aria-hidden="true" />
-        <div className="complex-entrance-sign">← HALL OF ORIGINS</div>
+        <div className="complex-entrance-sign">← CENTRAL PLAZA</div>
         <div className="complex-depth-label">RESEARCH DEPTH // 01</div>
 
         {FUTURE_MODULES.map((module, index) => (
@@ -202,24 +229,25 @@ export function ResearchMapScene() {
         </section>
 
         <div ref={movement.playerRef} className="player-on-map" style={movement.playerStyle} data-player-direction={movement.direction}>
-          {voice.expression && <span key={voice.expression.id} className="voice-note-bubble research-note">♪ {voice.expression.note}</span>}
+          <VoiceParticles expression={voice.expression} className="research-note" />
           <PixelRobot direction={movement.direction} walking={movement.walking} visionUpgraded learningUpgraded communicationUpgraded deepLearningUpgraded />
         </div>
       </div>
 
       <div className="map-action-hints">
-        <div className="interaction-prompt research-prompt"><span>E</span>{prompt}</div>
-        <div className="voice-prompt research-voice"><span>F</span>VOICE</div>
+        <InteractionPrompt active={activePanel ? null : activeInteractable} className="research-prompt" />
+        {voiceAvailable && <div className="voice-prompt research-voice"><span>F</span>VOICE</div>}
       </div>
       <VirtualControls
         onDirectionChange={movement.input.setDirection}
         onReset={movement.input.resetDirections}
-        onInteract={() => interact(movement.positionRef.current)}
-        onExpress={voice.express}
+        onInteract={!activePanel && activeInteractable ? interact : undefined}
+        interactionLabel={activeInteractable?.actionLabel}
+        onExpress={voiceAvailable ? voice.express : undefined}
       />
 
-      {activePanel?.kind === 'module' && <FutureModulePanel module={activePanel.module} align={activePanel.align} onClose={() => setActivePanel(null)} />}
-      {activePanel?.kind === 'gate' && <FinalGatePanel align={activePanel.align} onClose={() => setActivePanel(null)} />}
+      {activePanel?.kind === 'module' && <FutureModulePanel module={activePanel.module} align={activePanel.align} onClose={closePanel} />}
+      {activePanel?.kind === 'gate' && <FinalGatePanel align={activePanel.align} onClose={closePanel} />}
     </div>
   )
 }

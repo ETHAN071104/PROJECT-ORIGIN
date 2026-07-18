@@ -10,8 +10,8 @@ describe('Hall of Origins archive data', () => {
   })
 
   it('keeps the Hall timeline concise, chronological, and uniquely addressable', () => {
-    expect(HALL_TIMELINE_ENTRIES).toHaveLength(11)
-    expect(new Set(HALL_TIMELINE_ENTRIES.map((entry) => entry.id)).size).toBe(11)
+    expect(HALL_TIMELINE_ENTRIES).toHaveLength(12)
+    expect(new Set(HALL_TIMELINE_ENTRIES.map((entry) => entry.id)).size).toBe(12)
     expect(HALL_TIMELINE_ENTRIES.map((entry) => Number(entry.year))).toEqual(
       [...HALL_TIMELINE_ENTRIES].map((entry) => Number(entry.year)).sort((a, b) => a - b),
     )

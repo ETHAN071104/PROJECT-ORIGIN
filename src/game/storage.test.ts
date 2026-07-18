@@ -77,7 +77,35 @@ describe('Project Origin save migration', () => {
       finalGateReached: true,
       readExhibitIds: ['cv-shakey-1966', 'person-alan-turing'],
       lastMap: 'history',
-      lastSpawn: 'history-from-research',
+      lastSpawn: 'history-events-from-people',
     })
+  })
+
+  it('preserves the optional People branch before DL while keeping locked Research state safe', () => {
+    const storage = new MemoryStorage()
+    Object.defineProperty(globalThis, 'localStorage', { value: storage, configurable: true })
+    storage.setItem(SAVE_KEY, JSON.stringify({
+      playerName: 'ORI',
+      introCompleted: true,
+      completedLabs: { cv: true, ml: false, nlp: false, dl: false },
+      stageProgress: { cv: 4, ml: 0, nlp: 0, dl: 0 },
+      achievements: ['MACHINES_FIRST_SIGHT'],
+      audioEnabled: true,
+      worldProgress: {
+        hallVisited: true,
+        researchVisited: true,
+        finalGateReached: true,
+        readExhibitIds: ['person-alan-turing'],
+        lastMap: 'people',
+        lastSpawn: 'people-from-events',
+      },
+    }))
+
+    const migrated = loadSave()
+    expect(migrated?.worldProgress.lastMap).toBe('people')
+    expect(migrated?.worldProgress.lastSpawn).toBe('people-from-events')
+    expect(migrated?.worldProgress.hallVisited).toBe(true)
+    expect(migrated?.worldProgress.researchVisited).toBe(false)
+    expect(migrated?.worldProgress.finalGateReached).toBe(false)
   })
 })

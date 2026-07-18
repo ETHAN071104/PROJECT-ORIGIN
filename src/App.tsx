@@ -13,6 +13,7 @@ import { NlpLabScene } from './scenes/NlpLabScene'
 import { DlLabScene } from './scenes/DlLabScene'
 import { ResearchMapScene } from './scenes/ResearchMapScene'
 import { HistoryMapScene } from './scenes/HistoryMapScene'
+import { PeopleMapScene } from './scenes/PeopleMapScene'
 import { TitleScreen } from './scenes/TitleScreen'
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
       {state.screen === 'NAME_ENTRY' && <NameEntryScene />}
       {state.screen === 'HUB' && <HubScene />}
       {state.screen === 'HISTORY_MAP' && <HistoryMapScene />}
+      {state.screen === 'PEOPLE_MAP' && <PeopleMapScene />}
       {state.screen === 'RESEARCH_MAP' && <ResearchMapScene />}
       {state.screen === 'LAB_INTERIOR' && <LabInteriorScene />}
       {state.screen === 'DIALOGUE' && <DialogueScene />}

@@ -26,6 +26,7 @@ html, body, #root {
   overflow: hidden;
   overscroll-behavior: none;
   background: var(--ink);
+  touch-action: none;
 }
 
 button, input { font: inherit; }
@@ -35,10 +36,12 @@ button { -webkit-tap-highlight-color: transparent; }
 .mentor-hint-close:hover, .mentor-hint-close:focus-visible { color: #090b19; background: var(--cyan-pale); border-color: #fff; outline: 2px solid #fff; outline-offset: 2px; }
 
 .game-shell {
+  position: relative;
   width: 100vw;
   height: 100dvh;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   background: #050611;
+  touch-action: none;
 }
 
 .game-stage-host {
@@ -82,7 +85,7 @@ button { -webkit-tap-highlight-color: transparent; }
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 120;
   place-items: center;
   align-content: center;
   gap: 14px;
@@ -96,6 +99,33 @@ button { -webkit-tap-highlight-color: transparent; }
 .rotate-overlay p { margin: 0; font-size: 14px; color: var(--muted); }
 .rotate-device { width: 50px; height: 78px; border: 5px solid var(--purple); position: relative; animation: rotate-device 1.8s steps(4) infinite; }
 .rotate-device span { position: absolute; width: 8px; height: 4px; background: var(--cyan); bottom: 5px; left: 16px; }
+
+.immersive-gate { position: fixed; inset: 0; z-index: 110; display: grid; place-items: center; overflow: auto; padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left)); color: #eaf3f3; background: #070918; touch-action: manipulation; }
+.immersive-stars { position: absolute; inset: 0; opacity: .7; background-image: radial-gradient(#65d9e8 1px, transparent 1px), radial-gradient(#79699b 1px, transparent 1px); background-position: 0 0, 13px 17px; background-size: 43px 43px, 67px 67px; }
+.immersive-card { position: relative; width: min(610px, 92vw); padding: 28px 34px 24px; text-align: center; background: #10152c; border: 4px solid #536da0; box-shadow: inset 0 0 0 5px #1b2342, 8px 8px #03040c; }
+.immersive-card::before { content: "MOBILE EXPERIENCE PROTOCOL"; position: absolute; left: 15px; top: 12px; color: #6f7e9d; font-size: 8px; letter-spacing: .14em; }
+.immersive-origin-mark { position: relative; width: 44px; height: 44px; margin: 8px auto 14px; transform: rotate(45deg); background: #65d9e8; box-shadow: 0 0 16px rgb(101 217 232 / .35); }
+.immersive-origin-mark i { position: absolute; inset: 8px; background: #11162f; }.immersive-origin-mark b { position: absolute; inset: 16px; background: #a682bf; }
+.immersive-card > span { color: #9a86b8; font-size: 9px; font-weight: 900; letter-spacing: .14em; }
+.immersive-card h1 { margin: 10px auto 12px; max-width: 520px; color: #b8f4f4; font-size: clamp(20px, 5vw, 34px); line-height: 1.05; text-shadow: 3px 3px #17214b; }
+.immersive-card > p { margin: 0 auto 18px; max-width: 480px; color: #b5c1ce; font-size: clamp(11px, 2.6vw, 15px); line-height: 1.45; }
+.immersive-card > button { display: block; width: min(330px, 88%); min-height: 42px; margin: 9px auto 0; border: 3px solid #91f5f2; box-shadow: 4px 4px #03050d; cursor: pointer; font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+.immersive-primary { color: #08101a; background: #65d9e8; }.immersive-secondary { color: #e5eaf0; background: #343b6b; border-color: #6f7fae !important; }.immersive-tertiary { color: #c7cdd8; background: #191d34; border-color: #59627d !important; }
+.immersive-card > button:active { transform: translate(2px, 2px); box-shadow: 2px 2px #03050d; }
+.immersive-card > small { display: block; margin-top: 15px; color: #818ca1; font-size: 9px; line-height: 1.4; }
+.install-status { margin: 12px auto 0; padding: 7px 9px; color: #b8f4f4; background: #16243a; border: 2px solid #3d6a78; font-size: 8px; line-height: 1.4; }
+.install-guide { margin: 15px auto 0; padding: 12px 14px; text-align: left; color: #cbd5dd; background: #0a0d1c; border: 3px solid #604f7b; }
+.install-guide strong { color: #d7b6e7; font-size: 10px; }.install-guide ol { margin: 9px 0 11px; padding-left: 21px; font-size: 9px; line-height: 1.55; }.install-guide button { display: block; margin-left: auto; padding: 6px 9px; color: #e6ebef; background: #2b3150; border: 2px solid #66718f; font-size: 8px; font-weight: 900; }
+
+@media (max-height: 430px) and (orientation: landscape) {
+  .immersive-card { width: min(760px, 92vw); padding: 18px 28px 14px; }
+  .immersive-origin-mark { position: absolute; left: 28px; top: 35px; width: 36px; height: 36px; margin: 0; }
+  .immersive-card h1 { margin: 6px auto; font-size: 19px; }
+  .immersive-card > p { margin-bottom: 8px; font-size: 10px; }
+  .immersive-card > button { display: inline-block; width: auto; min-width: 175px; min-height: 34px; margin: 5px 4px 0; font-size: 9px; }
+  .immersive-card > small { margin-top: 7px; font-size: 7px; }
+  .install-guide { position: absolute; inset: 12px; margin: 0; padding: 12px 18px; }
+}
 
 .pixel-button {
   position: relative;
@@ -412,7 +442,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .dpad-key, .interact-button { border: 3px solid #6b7893; color: #e8edf0; background: rgb(19 25 49 / .91); box-shadow: inset -3px -3px #090c1d, inset 3px 3px #3b4765; font-weight: 900; touch-action: none; user-select: none; }
 .dpad-key:active, .interact-button:active { color: var(--ink); background: var(--cyan); transform: scale(.95); }
 .dpad-up { grid-column: 2; grid-row: 1; }.dpad-left { grid-column: 1; grid-row: 2; }.dpad-center { grid-column: 2; grid-row: 2; background: rgb(19 25 49 / .91); }.dpad-right { grid-column: 3; grid-row: 2; }.dpad-down { grid-column: 2; grid-row: 3; }
-.interact-button { width: clamp(58px, 9cqw, 76px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; align-content: center; color: var(--cyan); font-size: clamp(16px, 3cqw, 24px); pointer-events: auto; }.interact-button small { display: block; font-size: clamp(6px, .8cqw, 9px); }
+.interact-button { width: clamp(58px, 9cqw, 76px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; align-content: center; color: var(--cyan); font-size: clamp(16px, 3cqw, 24px); pointer-events: auto; }.interact-button small { display: block; max-width: 54px; overflow: hidden; font-size: clamp(5px, .65cqw, 8px); line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
 
 @keyframes caret-blink { 50% { opacity: 0; } }
 @keyframes next-bounce { 50% { transform: translateY(3px); } }
