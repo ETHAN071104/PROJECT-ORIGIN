@@ -183,6 +183,7 @@
 }
 
 .creator-record-panel { width: 650px; }
+.settings-record-panel { width: 520px; }
 
 .title-record-panel > p:first-child {
   margin: 0 0 7px;
@@ -236,6 +237,18 @@
   font-size: 9px;
   line-height: 1.6;
 }
+
+.settings-record-copy { margin: 0 auto 18px; color: #aebbc5; font-size: 10px; line-height: 1.55; }
+.language-setting { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 20px; padding-top: 24px; border-top: 2px solid #394663; }
+.language-setting > span { grid-column: 1 / -1; margin-top: -16px; color: #72dce5; font-size: 8px; font-weight: 900; letter-spacing: .14em; }
+.language-setting > button { position: relative; min-height: 92px; display: grid; grid-template-columns: 50px 1fr; grid-template-rows: 1fr 1fr; align-items: center; padding: 12px 14px; color: #dce7e8; background: #1a223d; border: 4px solid #465474; box-shadow: inset -5px -5px #0c1124, inset 5px 5px #293657, 4px 4px #050711; cursor: pointer; text-align: left; }
+.language-setting > button:hover, .language-setting > button:focus-visible { border-color: #83dfe5; outline: 2px solid #eef8f6; outline-offset: 3px; }
+.language-setting > button.is-selected { color: #071019; background: #72dce5; border-color: #c9ffff; box-shadow: inset -5px -5px #3294a8, inset 5px 5px #b5f4f2, 4px 4px #050711; }
+.language-setting i { grid-row: 1 / 3; width: 38px; height: 38px; display: grid; place-items: center; color: #09101d; background: #a9eced; border: 4px solid #30445d; font-size: 13px; font-style: normal; font-weight: 900; }
+.language-setting strong { align-self: end; font-size: 12px; letter-spacing: .08em; }.language-setting small { min-height: 10px; align-self: start; margin-top: 5px; color: #778ba0; font-size: 7px; font-weight: 900; }.language-setting .is-selected small { color: #155265; }
+
+html[lang="zh-CN"] body { font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", monospace; }
+html[lang="zh-CN"] .title-menu .pixel-button { letter-spacing: .04em; }
 
 .creator-record-layout {
   display: grid;
@@ -373,4 +386,8 @@
   .creator-statement { margin: 8px 0 10px; }
   .creator-statement p { padding: 8px 12px; line-height: 1.4; }
   .title-record-panel .pixel-button, .record-link-button { min-height: 31px; padding: 7px 12px; }
+  .settings-record-copy { margin-bottom: 10px; }
+  .language-setting { margin-bottom: 12px; padding-top: 18px; }
+  .language-setting > button { min-height: 68px; padding: 8px 12px; }
+  .language-setting i { width: 32px; height: 32px; }
 }

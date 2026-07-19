@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   boundariesMatch,
+  FINAL_TITLE,
+  FINAL_TITLE_ALTERNATE,
+  finalTitleMatches,
   moveWord,
   ORDERING_ROUNDS,
   orderingMatches,
@@ -40,5 +43,11 @@ describe('NLP lab teaching data', () => {
     expect(moveWord(source, 0, -1)).toBe(source)
     expect(orderingMatches(ORDERING_ROUNDS[0].correct, ORDERING_ROUNDS[0].correct)).toBe(true)
     expect(orderingMatches(ORDERING_ROUNDS[0].scrambled, ORDERING_ROUNDS[0].correct)).toBe(false)
+  })
+
+  it('accepts both meaningful Transformer title orders', () => {
+    expect(finalTitleMatches(FINAL_TITLE)).toBe(true)
+    expect(finalTitleMatches(FINAL_TITLE_ALTERNATE)).toBe(true)
+    expect(finalTitleMatches(['Attention', 'All', 'You', 'Need', 'Is'])).toBe(false)
   })
 })

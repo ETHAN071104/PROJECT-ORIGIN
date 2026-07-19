@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { playTone } from '../audio/audio'
+import { playEndingCue, playTone } from '../audio/audio'
 import { InteractionPrompt } from '../components/InteractionPrompt'
 import { PixelRobot } from '../components/PixelRobot'
 import { VirtualControls } from '../components/VirtualControls'
@@ -57,16 +57,16 @@ const WEST_EXIT: InteractionCandidate = {
   interactionRadius: 54,
 }
 
-function usePanelKeys(onClose: () => void) {
+function usePanelKeys(onClose: () => void, closeOnConfirm = true) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!['Escape', 'Enter', 'KeyE', 'Space'].includes(event.code)) return
+      if (event.code !== 'Escape' && !(closeOnConfirm && ['Enter', 'KeyE', 'Space'].includes(event.code))) return
       event.preventDefault()
       if (!event.repeat) onClose()
     }
     window.addEventListener('keydown', onKeyDown, { passive: false })
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
+  }, [closeOnConfirm, onClose])
 }
 
 function FutureModulePanel({ module, align, onClose }: { module: FutureModule; align: 'left' | 'right'; onClose: () => void }) {
@@ -84,8 +84,8 @@ function FutureModulePanel({ module, align, onClose }: { module: FutureModule; a
   )
 }
 
-function FinalGatePanel({ align, onClose }: { align: 'left' | 'right'; onClose: () => void }) {
-  usePanelKeys(onClose)
+function FinalGatePanel({ align, endingCompleted, onBegin, onClose }: { align: 'left' | 'right'; endingCompleted: boolean; onBegin: () => void; onClose: () => void }) {
+  usePanelKeys(onClose, false)
   const modules = ['CV', 'ML', 'NLP', 'DL']
   return (
     <aside className={`research-info-panel final-scan-panel is-${align}`} role="dialog" aria-modal="true" aria-label="Archive Zero foundational intelligence scan">
@@ -96,7 +96,11 @@ function FinalGatePanel({ align, onClose }: { align: 'left' | 'right'; onClose: 
         {modules.map((module) => <div key={module}><strong>{module}</strong><i />RESTORED</div>)}
       </div>
       <div className="origin-record-message"><i />ORIGIN RECORD DETECTED</div>
-      <footer><b>AUTHORIZATION PENDING</b><button type="button" onClick={onClose}>CLOSE</button></footer>
+      <footer>
+        <b>{endingCompleted ? 'ORIGIN RECORD ACCESSED' : 'ORIGIN PATH OPEN'}</b>
+        <button type="button" onClick={onBegin}>{endingCompleted ? 'REPLAY PATH' : 'ENTER'}</button>
+        <button type="button" onClick={onClose}>CLOSE</button>
+      </footer>
     </aside>
   )
 }
@@ -125,11 +129,11 @@ export function ResearchMapScene() {
     {
       ...RESEARCH_FINAL_GATE,
       id: 'archive-zero',
-      actionLabel: 'Examine ARCHIVE ZERO',
+      actionLabel: state.save.endingCompleted ? 'Revisit ARCHIVE ZERO' : 'Enter ARCHIVE ZERO',
       type: 'gate' as const,
       priority: 90,
     },
-  ], [])
+  ], [state.save.endingCompleted])
   const [activeInteractable, setActiveInteractable] = useState<ActiveInteractable | null>(() => (
     selectActiveInteractable(spawn.position, candidates)
   ))
@@ -186,12 +190,19 @@ export function ResearchMapScene() {
     setActiveInteractable(selectActiveInteractable(movement.positionRef.current, candidates))
   }, [candidates, movement.positionRef])
 
+  const beginEnding = useCallback(() => {
+    setActivePanel(null)
+    setActiveInteractable(null)
+    playEndingCue(state.save.audioEnabled, 'gate')
+    dispatch({ type: 'START_ENDING' })
+  }, [dispatch, state.save.audioEnabled])
+
   return (
     <div className="scene research-map-scene">
       <div className="scene-hud research-hud">
         <div><span>SECTOR</span><strong>RESEARCH—EAST</strong></div>
         <div className="hub-title"><span>RESEARCH LAB COMPLEX</span><strong>FUTURE MODULE CORRIDOR</strong></div>
-        <div><span>FINAL GATE</span><strong>{state.save.worldProgress.finalGateReached ? 'PENDING' : 'DETECTED'}</strong></div>
+        <div><span>FINAL GATE</span><strong>{state.save.endingCompleted ? 'ACCESSED' : state.save.worldProgress.finalGateReached ? 'OPEN' : 'DETECTED'}</strong></div>
       </div>
 
       <div className="research-map research-complex-map" aria-label="Research Lab Complex with three sealed future modules and the Archive Zero Final Gate">
@@ -222,11 +233,11 @@ export function ResearchMapScene() {
           <div className="corridor-module-lights"><span>CV</span><span>ML</span><span>NLP</span><span>DL</span></div>
         </div>
 
-        <section className="archive-zero-gate" aria-label="Archive Zero Final Gate">
+        <section className={`archive-zero-gate ${state.save.endingCompleted ? 'is-accessed' : state.save.worldProgress.finalGateReached ? 'is-open' : ''}`} aria-label="Archive Zero Final Gate">
           <div className="archive-zero-rails" aria-hidden="true"><i /><i /><i /><i /></div>
           <div className="archive-zero-crown"><i /><i /><b /></div>
           <span>FINAL GATE</span><strong>ARCHIVE ZERO</strong>
-          <div className="archive-zero-status" aria-hidden="true"><i />ORIGIN SEAL // PENDING<i /></div>
+          <div className="archive-zero-status" aria-hidden="true"><i />{state.save.endingCompleted ? 'ORIGIN RECORD ACCESSED' : state.save.worldProgress.finalGateReached ? 'ORIGIN PATH OPEN' : 'ORIGIN SEAL // PENDING'}<i /></div>
           <div className="archive-zero-door">
             <i /><i /><b /><span />
             <div className="archive-zero-lock-core" aria-hidden="true"><i /><i /><i /><b /></div>
@@ -254,7 +265,7 @@ export function ResearchMapScene() {
       />
 
       {activePanel?.kind === 'module' && <FutureModulePanel module={activePanel.module} align={activePanel.align} onClose={closePanel} />}
-      {activePanel?.kind === 'gate' && <FinalGatePanel align={activePanel.align} onClose={closePanel} />}
+      {activePanel?.kind === 'gate' && <FinalGatePanel align={activePanel.align} endingCompleted={state.save.endingCompleted} onBegin={beginEnding} onClose={closePanel} />}
     </div>
   )
 }

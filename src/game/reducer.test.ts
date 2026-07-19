@@ -149,6 +149,77 @@ describe('Project Origin navigation state machine', () => {
     expect(state.save.worldProgress.finalGateReached).toBe(true)
   })
 
+  it('starts the Archive Zero ending only after every Lab is complete and the Final Gate is reached', () => {
+    let state = createInitialState(null)
+    state = { ...state, screen: 'RESEARCH_MAP' }
+
+    expect(gameReducer(state, { type: 'START_ENDING' })).toBe(state)
+
+    state = {
+      ...state,
+      save: { ...state.save, completedLabs: { cv: true, ml: true, nlp: true, dl: true } },
+    }
+    expect(gameReducer(state, { type: 'START_ENDING' })).toBe(state)
+
+    state = gameReducer(state, { type: 'REACH_FINAL_GATE' })
+    state = gameReducer(state, { type: 'START_ENDING' })
+
+    expect(state.screen).toBe('ENDING')
+    expect(state.save.endingCompleted).toBe(false)
+    expect(state.save.worldProgress.lastMap).toBe('research')
+    expect(state.save.worldProgress.lastSpawn).toBe('research-from-ending')
+  })
+
+  it('records ending completion and returns to a safe Research spawn without replaying automatically', () => {
+    let state = createInitialState(null)
+    state = {
+      ...state,
+      screen: 'RESEARCH_MAP',
+      hasStoredSave: true,
+      save: {
+        ...state.save,
+        playerName: 'ORI',
+        introCompleted: true,
+        completedLabs: { cv: true, ml: true, nlp: true, dl: true },
+        worldProgress: { ...state.save.worldProgress, finalGateReached: true },
+      },
+    }
+    state = gameReducer(state, { type: 'START_ENDING' })
+    state = gameReducer(state, { type: 'COMPLETE_ENDING' })
+
+    expect(state.screen).toBe('ENDING')
+    expect(state.save.endingCompleted).toBe(true)
+
+    state = gameReducer(state, { type: 'CONTINUE_EXPLORING' })
+    expect(state.screen).toBe('RESEARCH_MAP')
+    expect(state.researchSpawn).toBe('research-from-ending')
+    expect(state.save.worldProgress.lastSpawn).toBe('research-from-ending')
+
+    state = { ...state, screen: 'TITLE' }
+    state = gameReducer(state, { type: 'CONTINUE_GAME' })
+    expect(state.screen).toBe('RESEARCH_MAP')
+    expect(state.researchSpawn).toBe('research-from-ending')
+  })
+
+  it('marks the ending complete before returning to the title', () => {
+    let state = createInitialState(null)
+    state = {
+      ...state,
+      screen: 'ENDING',
+      save: {
+        ...state.save,
+        completedLabs: { cv: true, ml: true, nlp: true, dl: true },
+        worldProgress: { ...state.save.worldProgress, finalGateReached: true },
+      },
+    }
+
+    state = gameReducer(state, { type: 'END_ENDING_TO_TITLE' })
+
+    expect(state.screen).toBe('TITLE')
+    expect(state.save.endingCompleted).toBe(true)
+    expect(state.save.worldProgress.lastSpawn).toBe('research-from-ending')
+  })
+
   it('continues on the last unlocked world map with its safe named spawn', () => {
     let state = createInitialState(null)
     state = {
@@ -186,6 +257,16 @@ describe('Project Origin navigation state machine', () => {
     expect(state.currentLab).toBeNull()
     expect(state.save).toBe(save)
     expect(state.hasStoredSave).toBe(true)
+  })
+
+  it('persists the selected language across a new game', () => {
+    let state = createInitialState(null)
+    state = gameReducer(state, { type: 'SET_LANGUAGE', language: 'zh-CN' })
+    expect(state.save.language).toBe('zh-CN')
+
+    state = gameReducer(state, { type: 'NEW_GAME' })
+    expect(state.save.language).toBe('zh-CN')
+    expect(state.screen).toBe('INTRO')
   })
 
   it('keeps DL sealed until all three foundation labs are complete', () => {

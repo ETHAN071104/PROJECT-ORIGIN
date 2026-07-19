@@ -1,6 +1,6 @@
 # PROJECT ORIGIN - Project Status
 
-Updated: 2026-07-18
+Updated: 2026-07-19
 
 ## Completed systems
 
@@ -8,10 +8,11 @@ Updated: 2026-07-18
 - Fixed 960 x 540 logical game viewport with centered 16:9 scaling, letterboxing, safe-area support, a portrait rotation overlay, and logical pointer conversion.
 - Screenshot-guided PROJECT ORIGIN archive title screen with a dedicated pixel-art academy backdrop, New Game, save-aware Continue, separate Creator Record and Project Record panels, and persisted sound setting.
 - Creator Record presents Ethan Lim's creator, role, education, Malaysia location, project statement, and keyboard/touch-accessible GitHub and LinkedIn links. Project Record keeps the game format, curriculum, input, and project description separate from the biography.
+- Home Settings offers English and Simplified Chinese. The selected language updates the current screen immediately, persists across Continue and refresh, survives New Game, and keeps curriculum answer IDs and scoring language-independent.
 - Mandatory survival-origin opening, name entry, academy arrival, continuous keyboard movement, mobile landscape controls, and named door return spawns.
-- Compact AI Academy hub with walkable CV, ML, NLP, and foundation-gated DL buildings around an environmental ORIGIN plaza, followed by the gated Hall of Origins and Research Lab Complex.
+- Compact AI Academy hub with walkable CV, ML, NLP, and foundation-gated DL buildings around an environmental ORIGIN plaza, plus independent History/People and gated Research branches.
 - Reusable portrait, typewriter, choice-dialogue, achievement, stage-success, hint, and replay systems.
-- Defensive `localStorage` save/continue, stage clamping, legacy placeholder migration, and generated Web Audio tones.
+- Defensive `localStorage` save/continue, stage clamping, legacy placeholder migration, persisted ending completion, and generated Web Audio tones.
 - Procedural pixel-art presentation with no remote assets, backend, or live AI inference.
 
 ## Completed Computer Vision content
@@ -49,6 +50,7 @@ Updated: 2026-07-18
   - explicit `INTRO`, three sentence-ordering rounds, `ATTENTION`, final-title ordering, `TRANSFORMER_ACTIVATION`, and `COMPLETE` phases;
   - selectable word tiles with large left/right controls, reset, confirm, unlimited retry, and two-error hint;
   - pronoun-reference question with a glowing robot-to-`it` connection;
+  - final-title validation accepts both `Attention Is All You Need` and `All You Need Is Attention`, including their corresponding Chinese presentation order;
   - ceremonial `TRANSFORMER ARCHIVE RESTORED` sequence with 2017, `Attention Is All You Need`, historical context, Lexi explanation, and a distinct completion tone.
 - Stage 0-4 persistence, `LANGUAGE_DECODER` / Language Decoder, replay mode, decoded academy signs, mouth/chest communication light, portrait voice-wave treatment, and `hub-from-nlp` return are complete.
 
@@ -58,15 +60,16 @@ Updated: 2026-07-18
 - NODE-9 introduction uses the shared mentor-left/player-right dialogue flow, followed by the standard walkable lab terminal and resume/replay structure.
 - Stage 1 - Neural Path:
   - exactly three deterministic connection grids with two, three, then four color pairs;
-  - pointer drag and tap-by-tap input, orthogonal-only paths, collision/crossing prevention, endpoint-connectivity validation that accepts multiple valid routes, Reset, Undo, unlimited retry, and a dismissible two-error NODE-9 hint;
+  - pointer-coordinate drag tracing that works across mobile touch cells, tap-by-tap fallback, one-step drag backtracking, orthogonal-only paths, collision/crossing prevention, endpoint-connectivity validation that accepts multiple valid routes, Reset, Undo, unlimited retry, and a dismissible two-error NODE-9 hint;
   - connection cells render direction-aware glow arms and circular junctions instead of a fixed vertical line;
   - post-stage explanation and Learn More note clearly label the grid as a connectivity analogy rather than a literal neural circuit.
 - Stage 2 - Power the Network:
   - exactly three deterministic layered signal routes;
-  - one visible transformation choice per layer, live arithmetic, current output, fixed maximum target, Reset, unlimited retry, and a two-error hint;
+  - one visible transformation choice per layer, live arithmetic, current output, fixed maximum target, intentionally mixed upper/lower maximum-choice positions, Reset, unlimited retry, and a two-error hint;
   - the interface explicitly labels its visible multipliers as a conceptual analogy for learned weights.
 - Stage 3 - Tune the Neuron:
   - deterministic pixel interference controlled by a circular knob, minus/plus buttons, pointer dragging, Arrow/A/D keys, and numeric confirmation;
+  - the recovered digits remain unreadable interference blocks until displayed clarity reaches at least 98 percent;
   - fixed recovery numbers `3`, `67`, and `2012`, authored target angles/tolerances, unlimited retry, and a two-error hint;
   - the completion note records 2012 and AlexNet's ImageNet result as a historical deep-learning milestone.
 - Final Boss - Gradient Descent Core:
@@ -86,8 +89,8 @@ Updated: 2026-07-18
 - Research Lab Complex retains its three sealed future-module wings, converging final corridor, and ARCHIVE ZERO Final Gate without a structural redesign.
 - Hub starts in a quiet, low-energy night state. Completing CV restores a warmer day palette and clearer campus visibility.
 - Completing ML powers animated relays and data conduits. Completing NLP decodes campus signs and unlocks `F` voice expression using do/re/mi/fa/so tone choices.
-- Completing all three foundation labs activates DL, but the east route remains sealed. Completing DL powers direct Hub-to-Research traversal while ARCHIVE ZERO remains authorization-pending.
-- The available DL building displays a quest exclamation mark, completed lab doors display a check badge, and the Hub HUD includes a save-preserving Home button back to the title menu.
+- Completing all three foundation labs activates DL, but the east route remains sealed. Completing DL powers direct Hub-to-Research traversal and makes the ARCHIVE ZERO origin path eligible.
+- The available DL building displays a quest exclamation mark, completed lab doors display a check badge, the unvisited History route gains a guide marker after the first Lab, the unvisited Research route gains one after all four Labs, and the Hub HUD includes a save-preserving Home button back to the title menu.
 - South/north History traversal, east/west Research traversal, named return spawns, keyboard controls, and contextual mobile interaction/voice buttons are complete.
 
 ## Completed History Events and People Gallery content
@@ -115,6 +118,7 @@ Updated: 2026-07-18
 - Non-standalone mobile browsers receive a pixel-art setup gate with user-triggered fullscreen, Install App, clear unsupported/rejected fallback, and Continue in Browser.
 - Exiting an entered fullscreen session clears held input, pauses movement in place, and offers Return to Fullscreen or Continue in Browser without resetting the current scene or Lab.
 - The existing portrait guard, fixed 960 x 540 logical frame, ResizeObserver scaling, pointer conversion, safe areas, and browser fallback remain intact.
+- Touch controls suppress browser selection, tap highlight, drag, context-menu, and callout behavior. A held D-pad direction continues moving until pointer release or cancellation instead of requiring repeated taps.
 - `manifest.webmanifest`, 192/512 pixel icons, production service-worker registration, runtime build-asset caching, standalone display, and offline navigation shell are complete. No API cache exists.
 
 ## Completed Research Lab Complex structure
@@ -122,9 +126,20 @@ Updated: 2026-07-18
 - The Research map now progresses from a west entrance through Reinforcement Learning, Generative AI, and Agent Intelligence wings to the final corridor and ARCHIVE ZERO.
 - All three future-module doors are visibly distinct, explicitly marked `FUTURE MODULE / LOCKED / COMING SOON / TO BE UPDATED`, and cannot be entered.
 - The final corridor visually transitions toward unknown technology, converges cables around the ORIGIN symbol, and reacts with all four restored module lights.
-- ARCHIVE ZERO now has a layered crown, cyan-violet energy rails, an `ORIGIN SEAL // PENDING` status plate, a larger multi-part lock core, and a `FINAL ACCESS` foundation without changing its pending narrative state.
-- ARCHIVE ZERO scans CV, ML, NLP, and DL as restored, then displays `FOUNDATIONAL INTELLIGENCE RESTORED`, `ORIGIN RECORD DETECTED`, and `AUTHORIZATION PENDING`.
-- The Final Gate records that it was reached but does not reveal the protagonist's origin, invent a villain, enter the dormant ending scene, or end the game.
+- ARCHIVE ZERO has a layered crown, cyan-violet energy rails, a multi-part lock core, a `FINAL ACCESS` foundation, and persistent open/accessed visual states.
+- ARCHIVE ZERO scans CV, ML, NLP, and DL as restored, displays `FOUNDATIONAL INTELLIGENCE RESTORED` and `ORIGIN RECORD DETECTED`, then exposes the explicit `ORIGIN PATH OPEN` action.
+- After the ending, the gate remains softly active with `ORIGIN RECORD ACCESSED`; replay requires a deliberate gate interaction.
+
+## Completed ARCHIVE ZERO ending
+
+- The reducer admits the ending only when all four Labs are complete, Research is active, and the Final Gate has been reached.
+- The gate scan and opening lead into a silent Origin Chamber with ordinary HUD, Voice, and free movement suppressed.
+- The player controls ORI for exactly three short forward inputs via W, Arrow Up, or one touch-forward control, then softly contacts a colossal mechanical leg.
+- A stepped camera tilt reveals one foreground original humanoid giant and several silent background silhouettes. A close-up softly wakes one eye/core with `AWAITING BUILDERS`; there is no combat, threat speech, villain reveal, or second ending.
+- Three paced message cards deliver the small-beginnings, continued-learning, and future-AI-developer invitation before the PROJECT ORIGIN logo and tagline.
+- `RETURN TO TITLE` and `CONTINUE EXPLORING` are keyboard/touch accessible. Both persist completion; Continue Exploring returns to `research-from-ending` before the gate.
+- Continue/reload resumes Research and never replays the cinematic automatically. ARCHIVE ZERO offers an explicit replay path after completion.
+- Gate, impact, reveal, and core cues are locally generated and respect the saved audio toggle.
 
 ## Academy completion and Research state
 
@@ -132,18 +147,21 @@ Updated: 2026-07-18
 - The three foundation flags activate DL and award `AI_AWAKENED`; they do not open the east route.
 - Completing DL awards `NEURAL_CORE_ONLINE`, returns the player outside DL facing away from its door, powers the Hub route beacon, and unlocks the Hall route.
 - Navigation is now Hub east → Research Lab Complex → ARCHIVE ZERO, while the independent optional branch is Hub south → AI History Events south → People of AI Gallery.
-- Research exploration and the Final Gate become available after DL, but the existing ending scene remains dormant for the later origin-reveal phase.
+- Research exploration and the Final Gate become available after DL; entering the restored ARCHIVE ZERO path starts the completed origin-reveal ending.
 
 ## Current architecture
 
 - `src/App.tsx` selects a scene from the reducer screen and active lab.
-- `src/game/GameContext.tsx` owns reducer state and persists every save-state change.
-- `src/game/reducer.ts` owns the independent History and Research branches, foundation/DL gates, monotonic CV/ML/NLP/DL progress, achievements, named spawns, optional history reads, and Final Gate state.
-- `src/game/storage.ts` owns `project-origin-save-v1`, safe four-lab/world defaults, stage clamping, and legacy placeholder migrations.
+- `src/game/GameContext.tsx` owns reducer state, persists every normal save-state change, and exposes a non-persisting development-only ending preview.
+- `src/i18n/i18n.ts` owns the Simplified Chinese game dictionary and safe dynamic-label patterns; `src/hooks/useDomTranslation.ts` localizes visible text and accessibility labels while preserving canonical gameplay data.
+- `src/game/reducer.ts` owns the independent History and Research branches, foundation/DL gates, monotonic CV/ML/NLP/DL progress, achievements, named spawns, optional history reads, Final Gate eligibility, ending completion, and both ending exits.
+- `src/game/storage.ts` owns `project-origin-save-v1`, safe four-lab/world/ending defaults, stage clamping, and legacy placeholder migrations.
 - `src/data/maps.ts` owns Hub/History/People/Research bounds, targets, transition thresholds, and named spawns.
 - `src/data/historyArchive.ts` owns all Lab exhibits, Hall timeline entries, People of AI records, and Modern Builders content.
 - `src/data/cvLab.ts`, `src/data/mlLab.ts`, `src/data/nlpLab.ts`, and `src/data/dlLab.ts` keep deterministic teaching content and answer helpers separate from presentation.
 - `src/scenes/HubScene.tsx`, `src/scenes/HistoryMapScene.tsx`, `src/scenes/PeopleMapScene.tsx`, and `src/scenes/ResearchMapScene.tsx` own four-map traversal, while the four Lab scenes keep their independent sequential flows.
+- `src/scenes/EndingScene.tsx` owns the timed phase sequence, three-step input, giant reveal, final text, and exit choices; `src/styles/ending.css` owns its procedural pixel-art staging.
+- `src/audio/audio.ts` generates the ending gate, impact, reveal, and core cues without remote audio assets.
 - `src/game/interactions.ts` and `src/components/InteractionPrompt.tsx` own contextual target selection and the single shared E HUD contract.
 - `src/game/immersive.ts` and `src/components/GameViewport.tsx` own touch-mobile detection, fullscreen/install state, input pausing, and standalone launch behavior.
 - `src/hooks/useVoiceExpression.ts` owns NLP-unlocked `F` note selection, playback, and the short-lived map expression bubble.
@@ -162,6 +180,8 @@ Storage key: `project-origin-save-v1`
   stageProgress: { cv: number; ml: number; nlp: number; dl: number }
   achievements: string[]
   audioEnabled: boolean
+  language: 'en' | 'zh-CN'
+  endingCompleted: boolean
   worldProgress: {
     hallVisited: boolean
     researchVisited: boolean
@@ -178,11 +198,13 @@ Storage key: `project-origin-save-v1`
 - Three-lab saves migrate with `completedLabs.dl = false` and `stageProgress.dl = 0` without changing the existing player, settings, lab progress, or achievements.
 - Saves from former CV, ML, or NLP placeholder completions resume the corresponding real curriculum unless the new completion achievement is present.
 - Saves without world progress receive safe Hub defaults. Valid History/People/Research visits, optional read IDs, Final Gate state, last map, and named entry spawn persist across refresh. Former corridor spawn IDs migrate to the new branches.
+- Saves without an ending flag receive `endingCompleted = false`. Completed endings preserve every Lab, achievement, history record, and audio preference while resuming at `research-from-ending` without automatic replay.
+- Saves without a valid language receive `language = 'en'`. English and Simplified Chinese selections persist, and starting a new game preserves the current language and sound preferences.
 
 ## Known limitations
 
-- The true origin room, protagonist origin reveal, final narrative resolution, and ending remain intentionally unimplemented.
-- The revised History branch received browser traversal coverage. Direct Research traversal and the complete four-Lab curriculum click-through were not rerun in this phase because the available save did not unlock the route and the Lab mini-games were deliberately left unchanged; Research received a non-persisting visual preview check instead.
+- The three named Future Module wings remain intentionally sealed `COMING SOON` content; the completed ARCHIVE ZERO sequence is the only ending.
+- The complete four-Lab curriculum click-through was not rerun because the Lab mini-games were deliberately unchanged; eligibility, migration, persistence, and post-ending navigation are covered by reducer/storage tests, with the final cinematic covered by a non-persisting development preview.
 - iOS/iPadOS does not expose the standard install prompt or general element fullscreen consistently; the game therefore shows Add to Home Screen guidance and preserves Continue in Browser rather than claiming success.
 - Service workers and native installation require a secure production origin (HTTPS, with localhost accepted for development). Vite development mode intentionally does not register the service worker to avoid stale local bundles.
 - Audio remains intentionally limited to generated tones.
@@ -191,26 +213,28 @@ Storage key: `project-origin-save-v1`
 
 ## Next planned phase
 
-1. Build the later ARCHIVE ZERO truth room and final narrative ending without reopening or rewriting the four completed academy labs.
-2. Perform the planned global art, lighting, character, portrait, and environmental-detail pass across all four maps.
-3. Consider a small checked-in browser smoke suite if the project moves beyond the hackathon MVP.
+1. Perform the planned global art, lighting, character, portrait, and environmental-detail pass across all four maps.
+2. Consider a small checked-in browser smoke suite if the project moves beyond the hackathon MVP.
+3. Expand the visibly sealed Future Module wings only in a later curriculum release; do not add another ending.
 
 ## Current revision verification
 
 - Production build passes strict TypeScript checks.
-- 12 Vitest files pass with 63 total tests.
-- Reducer coverage verifies Hub south to History Events, Events south to People, both upward returns, direct Hub east to Research, the correct east-side Hub return spawn, safe Continue behavior, and no automatic ending at ARCHIVE ZERO.
-- Storage coverage verifies legacy corridor-spawn migration, History/People persistence without Research access, valid Research state, filtering of invalid read IDs, and safe Hub fallback only for an invalid locked Research location.
+- 13 Vitest files pass with 76 total tests.
+- Reducer coverage verifies Hub/History/People/Research navigation plus ending eligibility, Final Gate triggering, completion persistence, safe Continue Exploring, Return to Title, and no automatic replay on Continue.
+- Storage coverage verifies legacy corridor-spawn migration, History/People persistence without Research access, safe Hub fallback for invalid locked Research, default-false ending migration, and preservation of a completed ending at `research-from-ending`.
 - Archive-data coverage verifies exactly eight Lab exhibits, 12 chronological event records, eight primary contributor records, unique IDs, and historically careful 1986 backpropagation wording.
 - Interaction tests verify hidden empty-space state, nearest-target selection, and deterministic priority ties. Browser traversal verified no desktop/mobile E control in empty Hub space and matching CV labels/actions when in range.
 - Voice tests verify the five syllables, permanent post-NLP exploration availability, non-exploration suppression, and the 550 ms cooldown.
 - Immersion tests verify mobile-gate state, desktop/standalone bypass, non-UA touch detection, unsupported/rejected fullscreen fallback, and safe orientation-lock rejection.
 - Browser traversal verified Hub south to the 12-event History map, continued south to the separate eight-person People Gallery, and returned north through both boundaries to Hub on a one-of-four save.
 - History Events and People Gallery were visually checked as separate rooms with no mixed record types. The fixed frame, no-scroll layout, and virtual controls were checked at 844 x 390 and 740 x 360; the portrait guard was checked at 390 x 844.
+- Mobile browser QA at 844 x 390 verified two-color touch dragging and completion in DL Stage 1, held-D-pad movement without selection, mixed DL Stage 2 answer positions, hidden Stage 3 digits at 96 percent and readable digits at 98 percent, and both History and Research route markers.
 - CV, ML, and NLP Lab interiors were visually checked in the running game: whiteboards and workbench props remained legible, both plants stayed inside the frame, and neither history exhibit was obscured. The CV camera and two lenses were specifically verified.
-- Research received a non-persisting development preview check: all three future-module signs were visible in front of their locked doors, and the revised ARCHIVE ZERO gate remained fully readable inside the fixed frame. The temporary preview path was removed afterward.
+- The non-persisting `?qa=ending` development preview verified the Final Gate scan/opening, three-input walk, impact, giant tilt/close-up, all message blocks, both ending choices, and the safe post-ending Research return without altering the normal saved game.
+- Ending layout checks passed at 1920 x 1080, 1366 x 768, 844 x 390, and 740 x 360 with no logical-frame overflow; the portrait guard passed at 390 x 844.
 - PWA output contains a standalone manifest, valid 192 x 192 and 512 x 512 PNG icons, service worker, and production offline-shell resources.
-- Title-page browser QA verified both record dialogs, safe new-tab attributes on both creator links, initial focus, Escape closing, focus return, and the five-item menu staying inside the fixed frame.
+- Title-page browser QA verified both record dialogs, safe new-tab attributes on both creator links, initial focus, Escape closing, focus return, and the menu staying inside the fixed frame.
 
 ## Prior verification archive
 

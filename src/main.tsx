@@ -9,6 +9,7 @@ import './styles/nlp.css'
 import './styles/dl.css'
 import './styles/maps.css'
 import './styles/title.css'
+import './styles/ending.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -34,7 +34,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...createInitialState(null),
         screen: 'INTRO',
-        save: emptySave(state.save.audioEnabled),
+        save: emptySave(state.save.audioEnabled, state.save.language),
       }
     case 'CONTINUE_GAME':
       if (!state.hasStoredSave) return state
@@ -59,12 +59,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
       if (allLabsComplete(state.save) && state.save.worldProgress.lastMap === 'research') {
+        const researchSpawn = state.save.worldProgress.lastSpawn === 'research-from-ending'
+          ? 'research-from-ending'
+          : 'research-from-hub'
         return {
           ...state,
           screen: 'RESEARCH_MAP',
           currentLab: null,
           dialogueKey: null,
-          researchSpawn: 'research-from-hub',
+          researchSpawn,
         }
       }
       return {
@@ -388,8 +391,73 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           worldProgress: { ...state.save.worldProgress, finalGateReached: true },
         },
       }
+    case 'START_ENDING':
+      if (
+        state.screen !== 'RESEARCH_MAP'
+        || !allLabsComplete(state.save)
+        || !state.save.worldProgress.finalGateReached
+      ) return state
+      return {
+        ...state,
+        screen: 'ENDING',
+        currentLab: null,
+        dialogueKey: null,
+        save: atWorldLocation(state.save, 'research', 'research-from-ending', {
+          researchVisited: true,
+          finalGateReached: true,
+        }),
+      }
+    case 'COMPLETE_ENDING':
+      if (state.screen !== 'ENDING' || state.save.endingCompleted) return state
+      return {
+        ...state,
+        hasStoredSave: true,
+        save: {
+          ...atWorldLocation(state.save, 'research', 'research-from-ending', {
+            researchVisited: true,
+            finalGateReached: true,
+          }),
+          endingCompleted: true,
+        },
+      }
+    case 'CONTINUE_EXPLORING':
+      if (state.screen !== 'ENDING') return state
+      return {
+        ...state,
+        screen: 'RESEARCH_MAP',
+        currentLab: null,
+        dialogueKey: null,
+        hasStoredSave: true,
+        researchSpawn: 'research-from-ending',
+        save: {
+          ...atWorldLocation(state.save, 'research', 'research-from-ending', {
+            researchVisited: true,
+            finalGateReached: true,
+          }),
+          endingCompleted: true,
+        },
+      }
+    case 'END_ENDING_TO_TITLE':
+      if (state.screen !== 'ENDING') return state
+      return {
+        ...state,
+        screen: 'TITLE',
+        currentLab: null,
+        dialogueKey: null,
+        hasStoredSave: true,
+        researchSpawn: 'research-from-ending',
+        save: {
+          ...atWorldLocation(state.save, 'research', 'research-from-ending', {
+            researchVisited: true,
+            finalGateReached: true,
+          }),
+          endingCompleted: true,
+        },
+      }
     case 'TOGGLE_AUDIO':
       return { ...state, save: { ...state.save, audioEnabled: !state.save.audioEnabled } }
+    case 'SET_LANGUAGE':
+      return { ...state, save: { ...state.save, language: action.language } }
     default:
       return state
   }

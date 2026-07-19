@@ -140,9 +140,9 @@ export const POWER_ROUNDS: PowerRound[] = [
   {
     id: 'two-layer-relay', input: 2, target: 8,
     layers: [
-      [{ id: 'l1-a', label: 'Pass ×1', gain: 1, bias: 0 }, { id: 'l1-b', label: 'Amplify ×2', gain: 2, bias: 0 }],
+      [{ id: 'l1-b', label: 'Amplify ×2', gain: 2, bias: 0 }, { id: 'l1-a', label: 'Pass ×1', gain: 1, bias: 0 }],
       [{ id: 'l2-a', label: 'Filter ×0.5', gain: .5, bias: 0 }, { id: 'l2-b', label: 'Relay ×1.5', gain: 1.5, bias: 0 }],
-      [{ id: 'l3-a', label: 'Linear ×1', gain: 1, bias: 0 }, { id: 'l3-b', label: 'Focus +2', gain: 1, bias: 2 }],
+      [{ id: 'l3-b', label: 'Focus +2', gain: 1, bias: 2 }, { id: 'l3-a', label: 'Linear ×1', gain: 1, bias: 0 }],
     ],
   },
   {
@@ -150,15 +150,15 @@ export const POWER_ROUNDS: PowerRound[] = [
     layers: [
       [{ id: 'r2-l1-a', label: 'Compress ×0.8', gain: .8, bias: 0 }, { id: 'r2-l1-b', label: 'Extract ×1.5 +1', gain: 1.5, bias: 1 }],
       [{ id: 'r2-l2-a', label: 'Gate ×0.5', gain: .5, bias: 0 }, { id: 'r2-l2-b', label: 'Combine ×2', gain: 2, bias: 0 }],
-      [{ id: 'r2-l3-a', label: 'Output ×0.7', gain: .7, bias: 0 }, { id: 'r2-l3-b', label: 'Output +3', gain: 1, bias: 3 }],
+      [{ id: 'r2-l3-b', label: 'Output +3', gain: 1, bias: 3 }, { id: 'r2-l3-a', label: 'Output ×0.7', gain: .7, bias: 0 }],
     ],
   },
   {
     id: 'deep-signal', input: 1, target: 12.5,
     layers: [
-      [{ id: 'r3-l1-a', label: 'Skip ×1', gain: 1, bias: 0 }, { id: 'r3-l1-b', label: 'Detect ×3', gain: 3, bias: 0 }],
+      [{ id: 'r3-l1-b', label: 'Detect ×3', gain: 3, bias: 0 }, { id: 'r3-l1-a', label: 'Skip ×1', gain: 1, bias: 0 }],
       [{ id: 'r3-l2-a', label: 'Drop ×0.5', gain: .5, bias: 0 }, { id: 'r3-l2-b', label: 'Learn ×2 +1', gain: 2, bias: 1 }],
-      [{ id: 'r3-l3-a', label: 'Clamp ×0.8', gain: .8, bias: 0 }, { id: 'r3-l3-b', label: 'Represent ×1.5', gain: 1.5, bias: 0 }],
+      [{ id: 'r3-l3-b', label: 'Represent ×1.5', gain: 1.5, bias: 0 }, { id: 'r3-l3-a', label: 'Clamp ×0.8', gain: .8, bias: 0 }],
       [{ id: 'r3-l4-a', label: 'Quiet ×0.6', gain: .6, bias: 0 }, { id: 'r3-l4-b', label: 'Readout +2', gain: 1, bias: 2 }],
     ],
   },

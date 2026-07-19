@@ -91,8 +91,10 @@ function NeuralPathStage({ onSaved, onContinue, onExit }: { onSaved: () => void;
   const [paths, setPaths] = useState<PathState>({})
   const [activeColor, setActiveColor] = useState<PathColor | null>(null)
   const [lastEdited, setLastEdited] = useState<PathColor | null>(null)
-  const [, setDragging] = useState(false)
+  const gridRef = useRef<HTMLDivElement>(null)
   const draggingRef = useRef(false)
+  const pointerIdRef = useRef<number | null>(null)
+  const pathOriginRef = useRef<GridCell | null>(null)
   const activeColorRef = useRef<PathColor | null>(null)
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [wrong, setWrong] = useState(false)
@@ -116,7 +118,11 @@ function NeuralPathStage({ onSaved, onContinue, onExit }: { onSaved: () => void;
       if (last && !isOrthogonalStep(last, cell)) return current
       const occupiedBy = PATH_COLORS.find((candidate) => (current[candidate] ?? []).some((item) => cellKey(item) === cellKey(cell)))
       if (occupiedBy && occupiedBy !== color) return current
-      if (path.some((item) => cellKey(item) === cellKey(cell))) return current
+      const existingIndex = path.findIndex((item) => cellKey(item) === cellKey(cell))
+      if (existingIndex >= 0) {
+        if (existingIndex === path.length - 2) return { ...current, [color]: path.slice(0, -1) }
+        return current
+      }
       return { ...current, [color]: [...path, cell] }
     })
   }
@@ -126,11 +132,33 @@ function NeuralPathStage({ onSaved, onContinue, onExit }: { onSaved: () => void;
     if (endpoint) {
       setActiveColor(endpoint)
       activeColorRef.current = endpoint
+      pathOriginRef.current = cell
       setLastEdited(endpoint)
       setPaths((current) => ({ ...current, [endpoint]: [cell] }))
       return
     }
-    if (activeColor) extend(activeColor, cell)
+    const color = activeColorRef.current ?? activeColor
+    if (color) extend(color, cell)
+  }
+
+  const finishDrag = (pointerId?: number) => {
+    draggingRef.current = false
+    pointerIdRef.current = null
+    if (pointerId !== undefined && gridRef.current?.hasPointerCapture(pointerId)) gridRef.current.releasePointerCapture(pointerId)
+  }
+
+  const continueDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!draggingRef.current || pointerIdRef.current !== event.pointerId || !activeColorRef.current) return
+    event.preventDefault()
+    const hit = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLButtonElement>('.neural-cell')
+    if (!hit || !gridRef.current?.contains(hit)) return
+    const row = Number(hit.dataset.row)
+    const col = Number(hit.dataset.col)
+    if (!Number.isInteger(row) || !Number.isInteger(col)) return
+    const cell = { row, col }
+    const color = activeColorRef.current
+    extend(color, cell)
+    if (endpointColor(cell) === color && pathOriginRef.current && cellKey(cell) !== cellKey(pathOriginRef.current)) finishDrag(event.pointerId)
   }
 
   const undo = () => {
@@ -158,6 +186,7 @@ function NeuralPathStage({ onSaved, onContinue, onExit }: { onSaved: () => void;
     setPaths({})
     setActiveColor(null)
     activeColorRef.current = null
+    pathOriginRef.current = null
     setLastEdited(null)
     setRoundClear(false)
     setWrong(false)
@@ -167,12 +196,17 @@ function NeuralPathStage({ onSaved, onContinue, onExit }: { onSaved: () => void;
     <DlStageShell stage={1} wrongAttempts={wrongAttempts} onExit={onExit}>
       <main className="neural-path-layout">
         <section className="dl-task-card"><span>CONNECTION PUZZLE {roundIndex + 1} / 3</span><h2>Link matching neural ports</h2><p>Drag or tap through orthogonal cells. Paths cannot cross. Any route is valid when every matching pair connects.</p></section>
-        <section
-          className={`neural-grid-shell ${wrong ? 'is-wrong' : ''}`}
-          onPointerUp={() => { setDragging(false); draggingRef.current = false }}
-          onPointerLeave={() => { setDragging(false); draggingRef.current = false }}
-        >
-          <div className="neural-grid" style={{ '--grid-size': round.size } as CSSProperties}>
+        <section className={`neural-grid-shell ${wrong ? 'is-wrong' : ''}`}>
+          <div
+            ref={gridRef}
+            className="neural-grid"
+            style={{ '--grid-size': round.size } as CSSProperties}
+            onPointerMove={continueDrag}
+            onPointerUp={(event) => finishDrag(event.pointerId)}
+            onPointerCancel={(event) => finishDrag(event.pointerId)}
+            onLostPointerCapture={() => finishDrag()}
+            onContextMenu={(event) => event.preventDefault()}
+          >
             {Array.from({ length: round.size * round.size }, (_, index) => {
               const cell = { row: Math.floor(index / round.size), col: index % round.size }
               const endpoint = endpointColor(cell)
@@ -182,10 +216,18 @@ function NeuralPathStage({ onSaved, onContinue, onExit }: { onSaved: () => void;
                 <button
                   type="button"
                   key={cellKey(cell)}
+                  data-row={cell.row}
+                  data-col={cell.col}
                   className={`neural-cell ${endpoint ? `is-endpoint path-${endpoint}` : ''} ${pathColor ? `is-path path-${pathColor}` : ''}`}
                   aria-label={`Grid row ${cell.row + 1}, column ${cell.col + 1}${endpoint ? `, ${endpoint} port` : ''}`}
-                  onPointerDown={(event) => { event.preventDefault(); setDragging(true); draggingRef.current = true; beginOrExtend(cell) }}
-                  onPointerEnter={() => { if (draggingRef.current && activeColorRef.current) extend(activeColorRef.current, cell) }}
+                  onPointerDown={(event) => {
+                    event.preventDefault()
+                    draggingRef.current = true
+                    pointerIdRef.current = event.pointerId
+                    beginOrExtend(cell)
+                    gridRef.current?.setPointerCapture(event.pointerId)
+                  }}
+                  onDragStart={(event) => event.preventDefault()}
                   onClick={(event) => { if (event.detail === 0) beginOrExtend(cell) }}
                 ><span className="path-direction-glow" aria-hidden="true">{directions.map((direction) => <b key={direction} className={`path-arm arm-${direction}`} />)}</span><i /></button>
               )
@@ -193,7 +235,7 @@ function NeuralPathStage({ onSaved, onContinue, onExit }: { onSaved: () => void;
           </div>
           <div className="path-legend">{round.pairs.map((pair) => <span key={pair.color} className={`path-${pair.color}`}><i />{pair.color}</span>)}</div>
         </section>
-        <div className="dl-action-row"><PixelButton variant="secondary" onClick={() => { setPaths({}); setActiveColor(null); activeColorRef.current = null; setWrong(false) }}>Reset</PixelButton><PixelButton variant="secondary" onClick={undo}>Undo</PixelButton><PixelButton onClick={confirm}>Verify Paths</PixelButton></div>
+        <div className="dl-action-row"><PixelButton variant="secondary" onClick={() => { setPaths({}); setActiveColor(null); activeColorRef.current = null; pathOriginRef.current = null; finishDrag(); setWrong(false) }}>Reset</PixelButton><PixelButton variant="secondary" onClick={undo}>Undo</PixelButton><PixelButton onClick={confirm}>Verify Paths</PixelButton></div>
       </main>
       {roundClear && <div className="dl-round-overlay" role="dialog"><p>CONNECTIONS STABLE</p><h2>Neural path {roundIndex + 1} synchronized</h2><PixelButton onClick={nextRound}>Next Grid</PixelButton></div>}
       {complete && <DlStageSuccess stage={1} onContinue={onContinue} />}
@@ -271,7 +313,8 @@ function TuneNeuronStage({ onSaved, onContinue, onExit }: { onSaved: () => void;
   const savedRef = useRef(false)
   const round = TUNING_ROUNDS[roundIndex]
   const quality = interferenceQuality(round, angle)
-  const tuned = quality >= 1 - round.tolerance / 90
+  const clarityPercent = Math.round(quality * 100)
+  const tuned = clarityPercent >= 98
 
   const normalizeAngle = (value: number) => setAngle((value % 360 + 360) % 360)
   const adjust = (amount: number) => { normalizeAngle(angle + amount); setWrong(false) }
@@ -304,10 +347,10 @@ function TuneNeuronStage({ onSaved, onContinue, onExit }: { onSaved: () => void;
       <main className="tune-neuron-layout">
         <section className="dl-task-card"><span>PARAMETER TEST {roundIndex + 1} / 3</span><h2>Tune away the interference</h2><p>Drag the dial, use −/+, or focus it and press arrow keys / A / D. Enter the number only when the signal is clear.</p></section>
         <section className={`tuning-console ${wrong ? 'is-wrong' : ''}`}>
-          <div className="interference-screen" style={{ '--quality': quality } as CSSProperties}>
-            <div className="hidden-digits" aria-label="Noisy number display">{round.hiddenNumber.split('').map((digit, index) => <span key={`${digit}-${index}`}>{digit}</span>)}</div>
-            <div className="pixel-interference" aria-hidden="true">{Array.from({ length: 24 }, (_, index) => <i key={index} style={{ '--noise-x': `${(index * 17 + round.seed * 7) % 92}%`, '--noise-y': `${(index * 29 + round.seed * 11) % 88}%`, '--noise-opacity': Math.max(.03, 1 - quality) } as CSSProperties} />)}</div>
-            <div className="quality-meter"><i style={{ width: `${Math.round(quality * 100)}%` }} /><span>CLARITY {Math.round(quality * 100)}%</span></div>
+          <div className={`interference-screen ${tuned ? 'is-readable' : ''}`} style={{ '--quality': quality } as CSSProperties}>
+            <div className="hidden-digits" aria-label={tuned ? `Clear number ${round.hiddenNumber}` : 'Noisy number, not yet readable'}>{round.hiddenNumber.split('').map((digit, index) => <span aria-hidden="true" key={`${digit}-${index}`}>{tuned ? digit : '▒'}</span>)}</div>
+            <div className="pixel-interference" aria-hidden="true">{Array.from({ length: 24 }, (_, index) => <i key={index} style={{ '--noise-x': `${(index * 17 + round.seed * 7) % 92}%`, '--noise-y': `${(index * 29 + round.seed * 11) % 88}%`, '--noise-opacity': tuned ? .02 : Math.max(.45, 1 - quality) } as CSSProperties} />)}</div>
+            <div className="quality-meter"><i style={{ width: `${clarityPercent}%` }} /><span>CLARITY {clarityPercent}%</span></div>
           </div>
           <div className="neuron-controls">
             <button type="button" className="tune-step" onClick={() => adjust(-2)} aria-label="Turn parameter down">−</button>

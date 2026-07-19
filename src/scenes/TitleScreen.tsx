@@ -3,7 +3,7 @@ import { PixelButton } from '../components/PixelButton'
 import { playTone } from '../audio/audio'
 import { useGame } from '../game/GameContext'
 
-type TitleRecord = 'creator' | 'project'
+type TitleRecord = 'creator' | 'project' | 'settings'
 
 export function TitleScreen() {
   const { state, dispatch } = useGame()
@@ -76,6 +76,7 @@ export function TitleScreen() {
         </PixelButton>
         <PixelButton variant="secondary" onClick={(event) => showRecord('creator', event.currentTarget)}>Creator Record</PixelButton>
         <PixelButton variant="secondary" onClick={(event) => showRecord('project', event.currentTarget)}>Project Record</PixelButton>
+        <PixelButton variant="secondary" onClick={(event) => showRecord('settings', event.currentTarget)}>Settings</PixelButton>
         <PixelButton variant="secondary" aria-pressed={state.save.audioEnabled} onClick={() => act('TOGGLE_AUDIO')}>
           Sound {state.save.audioEnabled ? 'On' : 'Off'}
         </PixelButton>
@@ -88,14 +89,14 @@ export function TitleScreen() {
         }}>
           <section
             ref={recordPanelRef}
-            className={`title-record-panel ${openRecord === 'creator' ? 'creator-record-panel' : 'project-record-panel'}`}
+            className={`title-record-panel ${openRecord === 'creator' ? 'creator-record-panel' : openRecord === 'settings' ? 'settings-record-panel' : 'project-record-panel'}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="title-record-heading"
             onKeyDown={trapRecordFocus}
           >
-            <p>ACADEMY ARCHIVE</p>
-            <h2 id="title-record-heading">{openRecord === 'creator' ? 'CREATOR RECORD' : 'PROJECT RECORD'}</h2>
+            <p>{openRecord === 'settings' ? 'ACADEMY SYSTEM' : 'ACADEMY ARCHIVE'}</p>
+            <h2 id="title-record-heading">{openRecord === 'creator' ? 'CREATOR RECORD' : openRecord === 'settings' ? 'SETTINGS' : 'PROJECT RECORD'}</h2>
 
             {openRecord === 'creator' ? (
               <>
@@ -135,7 +136,7 @@ export function TitleScreen() {
                   <PixelButton onClick={closeRecord}>Close</PixelButton>
                 </div>
               </>
-            ) : (
+            ) : openRecord === 'project' ? (
               <>
                 <dl className="project-record-grid">
                   <div><dt>PROJECT</dt><dd>PROJECT ORIGIN</dd></div>
@@ -144,6 +145,30 @@ export function TitleScreen() {
                   <div><dt>INPUT</dt><dd>KEYBOARD / TOUCH</dd></div>
                 </dl>
                 <p className="project-record-copy">A story-driven AI academy built for the browser. Restore the foundation labs and uncover the sealed Research facility.</p>
+                <div className="record-actions"><PixelButton onClick={closeRecord}>Close</PixelButton></div>
+              </>
+            ) : (
+              <>
+                <p className="settings-record-copy">Choose the language used throughout PROJECT ORIGIN.</p>
+                <div className="language-setting" role="group" aria-label="LANGUAGE">
+                  <span>LANGUAGE</span>
+                  <button
+                    type="button"
+                    className={state.save.language === 'en' ? 'is-selected' : ''}
+                    aria-pressed={state.save.language === 'en'}
+                    onClick={() => dispatch({ type: 'SET_LANGUAGE', language: 'en' })}
+                  >
+                    <i aria-hidden="true">EN</i><strong>ENGLISH</strong><small>{state.save.language === 'en' ? 'Selected' : ''}</small>
+                  </button>
+                  <button
+                    type="button"
+                    className={state.save.language === 'zh-CN' ? 'is-selected' : ''}
+                    aria-pressed={state.save.language === 'zh-CN'}
+                    onClick={() => dispatch({ type: 'SET_LANGUAGE', language: 'zh-CN' })}
+                  >
+                    <i aria-hidden="true">中</i><strong>中文</strong><small>{state.save.language === 'zh-CN' ? 'Selected' : ''}</small>
+                  </button>
+                </div>
                 <div className="record-actions"><PixelButton onClick={closeRecord}>Close</PixelButton></div>
               </>
             )}

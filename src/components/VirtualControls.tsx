@@ -58,30 +58,25 @@ export function VirtualControls({ onDirectionChange, onReset, onInteract, intera
     syncDirections()
   }
 
-  const releaseOutsideButton = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    const bounds = event.currentTarget.getBoundingClientRect()
-    const outside = event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom
-    if (outside || event.buttons === 0) releaseDirection(event)
-  }
-
   const moveButton = (direction: Direction, label: string) => (
     <button
+      type="button"
       className={`dpad-key dpad-${direction}`}
       data-direction={direction}
       aria-label={`Move ${direction}`}
       onPointerDown={(event) => pressDirection(direction, event)}
-      onPointerMove={releaseOutsideButton}
       onPointerUp={releaseDirection}
       onPointerCancel={releaseDirection}
-      onPointerLeave={releaseDirection}
       onLostPointerCapture={releaseDirection}
+      onContextMenu={(event) => event.preventDefault()}
+      onDragStart={(event) => event.preventDefault()}
     >
       {label}
     </button>
   )
 
   return (
-    <div className="virtual-controls" aria-label="Touch game controls">
+    <div className="virtual-controls" aria-label="Touch game controls" onContextMenu={(event) => event.preventDefault()}>
       <div className="dpad">
         {moveButton('up', '▲')}
         {moveButton('left', '◀')}
@@ -92,12 +87,14 @@ export function VirtualControls({ onDirectionChange, onReset, onInteract, intera
       <div className="map-action-buttons">
         {onExpress && (
           <button
+            type="button"
             className="expression-button"
             aria-label="Express a note"
             onPointerDown={(event) => {
               event.preventDefault()
               onExpress()
             }}
+            onContextMenu={(event) => event.preventDefault()}
           >
             F
             <small>VOICE</small>
@@ -105,6 +102,7 @@ export function VirtualControls({ onDirectionChange, onReset, onInteract, intera
         )}
         {onInteract && (
           <button
+            type="button"
             className="interact-button"
             aria-label={interactionLabel ? `Interact: ${interactionLabel}` : 'Interact'}
             onPointerDown={(event) => {
@@ -118,6 +116,7 @@ export function VirtualControls({ onDirectionChange, onReset, onInteract, intera
             onPointerCancel={(event) => {
               if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
             }}
+            onContextMenu={(event) => event.preventDefault()}
           >
             E
             <small>{interactionLabel ? interactionLabel.slice(0, 12) : 'ACT'}</small>

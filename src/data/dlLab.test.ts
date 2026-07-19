@@ -41,13 +41,30 @@ describe('Deep Learning deterministic curriculum', () => {
 
   it('calculates the visible layer arithmetic and recognizes only the maximum route', () => {
     for (const round of POWER_ROUNDS) {
-      const strongest = round.layers.map((layer) => layer.at(-1)!.id)
+      const choices = round.layers.reduce<string[][]>(
+        (paths, layer) => paths.flatMap((path) => layer.map((choice) => [...path, choice.id])),
+        [[]],
+      )
+      const strongest = choices.find((choiceIds) => isMaximumSignal(round, choiceIds))!
       const result = calculateNetworkSignal(round, strongest)
       expect(result.complete).toBe(true)
       expect(result.value).toBeCloseTo(round.target)
       expect(isMaximumSignal(round, strongest)).toBe(true)
-      expect(isMaximumSignal(round, round.layers.map((layer) => layer[0].id))).toBe(false)
+      expect(choices.some((choiceIds) => !isMaximumSignal(round, choiceIds))).toBe(true)
     }
+  })
+
+  it('mixes the maximum choices between upper and lower buttons', () => {
+    const maximumPositions = POWER_ROUNDS.map((round) => round.layers.map((layer) => {
+      const best = layer.reduce((current, choice) => (
+        choice.gain > current.gain || (choice.gain === current.gain && choice.bias > current.bias) ? choice : current
+      ))
+      return layer.indexOf(best)
+    }))
+
+    expect(maximumPositions[0]).toEqual([0, 1, 0])
+    expect(maximumPositions[1]).toEqual([1, 1, 0])
+    expect(maximumPositions[2]).toEqual([0, 1, 0, 1])
   })
 
   it('makes tuning quality deterministic and maximal at the authored angle', () => {

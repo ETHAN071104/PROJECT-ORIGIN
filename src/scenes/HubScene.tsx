@@ -29,6 +29,8 @@ export function HubScene() {
   const languageRestored = state.save.completedLabs.nlp
   const dlOnline = foundationsComplete(state.save)
   const routesPowered = allLabsComplete(state.save)
+  const historyQuestAvailable = Object.values(state.save.completedLabs).some(Boolean) && !state.save.worldProgress.hallVisited
+  const researchQuestAvailable = routesPowered && !state.save.worldProgress.researchVisited
   const foundationStatus = `CV ${state.save.completedLabs.cv ? 'OK' : '--'} / ML ${state.save.completedLabs.ml ? 'OK' : '--'} / NLP ${state.save.completedLabs.nlp ? 'OK' : '--'}`
   const transitioned = useRef(false)
   const spawn = HUB_SPAWNS[state.hubSpawn]
@@ -177,11 +179,15 @@ export function HubScene() {
         </div>
 
         <div className="east-gate" aria-label="East gate to the Research route">
+          {researchQuestAvailable && <span className="route-quest-marker research-quest-marker" aria-label="New Research task available">!</span>}
           <i className="gate-post gate-post-top" /><i className="gate-post gate-post-bottom" />
           <span>{languageRestored ? 'EAST' : 'E_ST'}</span><b aria-hidden="true">›</b>
           <div className="gate-beacon"><i /></div>
         </div>
-        <div className="history-south-gate" aria-label="South gate to the AI History Archive"><i /><span>HISTORY</span><b>↓</b><i /></div>
+        <div className="history-south-gate" aria-label="South gate to the AI History Archive">
+          {historyQuestAvailable && <span className="route-quest-marker history-quest-marker" aria-label="New History task available">!</span>}
+          <i /><span>HISTORY</span><b>↓</b><i />
+        </div>
 
         <AcademySign className="sign-plaza" decoded={languageRestored} text="CENTRAL QUAD" cipher="C?NTR_L // QD" />
         <AcademySign className="sign-route" decoded={languageRestored} text="RESEARCH →" cipher="R?S_//CH →" />

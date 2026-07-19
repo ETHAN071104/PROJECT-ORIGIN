@@ -2,13 +2,15 @@ import type { SaveData } from './types'
 
 export const SAVE_KEY = 'project-origin-save-v1'
 
-export const emptySave = (audioEnabled = true): SaveData => ({
+export const emptySave = (audioEnabled = true, language: SaveData['language'] = 'en'): SaveData => ({
   playerName: '',
   introCompleted: false,
   completedLabs: { cv: false, ml: false, nlp: false, dl: false },
   stageProgress: { cv: 0, ml: 0, nlp: 0, dl: 0 },
   achievements: [],
   audioEnabled,
+  language,
+  endingCompleted: false,
   worldProgress: {
     hallVisited: false,
     researchVisited: false,
@@ -34,6 +36,8 @@ export function loadSave(): SaveData | null {
       completedLabs: { ...emptySave().completedLabs, ...parsed.completedLabs },
       stageProgress: { ...emptySave().stageProgress, ...parsed.stageProgress },
       achievements: Array.isArray(parsed.achievements) ? parsed.achievements : [],
+      language: parsed.language === 'zh-CN' ? 'zh-CN' as const : 'en' as const,
+      endingCompleted: parsed.endingCompleted === true,
       worldProgress: {
         ...emptySave().worldProgress,
         ...parsedWorld,
@@ -82,10 +86,13 @@ export function loadSave(): SaveData | null {
       'history-events-from-hub', 'history-events-from-people',
     ].includes(save.worldProgress.lastSpawn)) save.worldProgress.lastSpawn = 'history-events-from-hub'
     if (save.worldProgress.lastMap === 'people') save.worldProgress.lastSpawn = 'people-from-events'
-    if (save.worldProgress.lastMap === 'research') save.worldProgress.lastSpawn = 'research-from-hub'
+    if (save.worldProgress.lastMap === 'research' && ![
+      'research-from-hub', 'research-from-ending',
+    ].includes(save.worldProgress.lastSpawn)) save.worldProgress.lastSpawn = 'research-from-hub'
     if (!(save.completedLabs.cv && save.completedLabs.ml && save.completedLabs.nlp && save.completedLabs.dl)) {
       save.worldProgress.researchVisited = false
       save.worldProgress.finalGateReached = false
+      save.endingCompleted = false
       if (save.worldProgress.lastMap === 'research') {
         save.worldProgress.lastMap = 'hub'
         save.worldProgress.lastSpawn = 'hub-default'

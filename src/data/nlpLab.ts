@@ -95,6 +95,8 @@ export const ORDERING_ROUNDS: OrderingRound[] = [
 export const ATTENTION_SENTENCE = ['The', 'robot', 'raised', 'a', 'hand', 'because', 'it', 'had', 'an', 'answer.']
 export const ATTENTION_CHOICES = ['robot', 'hand', 'answer']
 export const FINAL_TITLE = ['Attention', 'Is', 'All', 'You', 'Need']
+export const FINAL_TITLE_ALTERNATE = ['All', 'You', 'Need', 'Is', 'Attention']
+export const FINAL_TITLE_ORDERS = [FINAL_TITLE, FINAL_TITLE_ALTERNATE]
 export const FINAL_TITLE_SCRAMBLED = ['All', 'Need', 'Attention', 'You', 'Is']
 
 export function boundariesMatch(round: TokenRound, selected: number[]): boolean {
@@ -127,6 +129,10 @@ export function synonymMatches(left: string, right: string): boolean {
 
 export function orderingMatches(order: string[], correct: string[]): boolean {
   return order.length === correct.length && order.every((word, index) => word === correct[index])
+}
+
+export function finalTitleMatches(order: string[]): boolean {
+  return FINAL_TITLE_ORDERS.some((correct) => orderingMatches(order, correct))
 }
 
 export function moveWord(order: string[], from: number, offset: -1 | 1): string[] {

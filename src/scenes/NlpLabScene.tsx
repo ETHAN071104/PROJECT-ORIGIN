@@ -6,7 +6,7 @@ import {
   ATTENTION_CHOICES,
   ATTENTION_SENTENCE,
   boundariesMatch,
-  FINAL_TITLE,
+  finalTitleMatches,
   FINAL_TITLE_SCRAMBLED,
   moveWord,
   NLP_EXPLANATIONS,
@@ -421,7 +421,7 @@ function TransformerBossStage({ onComplete, onFinish, onExit }: { onComplete: ()
   }
 
   const confirmTitle = () => {
-    if (!orderingMatches(order, FINAL_TITLE)) return reject()
+    if (!finalTitleMatches(order)) return reject()
     playTone(state.save.audioEnabled, 'complete')
     setWrong(false)
     setActivationStep(0)

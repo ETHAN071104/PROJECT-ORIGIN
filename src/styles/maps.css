@@ -273,6 +273,10 @@
 .lab-complete-check { position: absolute; z-index: 3; left: 50%; top: 48%; width: 22px; height: 22px; display: grid; place-items: center; transform: translate(-50%, -50%); color: #09221c; background: #8ff2bd; border: 3px solid #d8ffe9; box-shadow: 0 0 8px #65dca0, 3px 3px #07120f; font-size: 14px; font-weight: 900; line-height: 1; }
 .lab-quest-marker { position: absolute; z-index: 12; left: 50%; top: -31px; width: 27px; height: 33px; display: grid; place-items: center; transform: translateX(-50%); color: #211638; background: #ffd870; border: 4px solid #fff0af; box-shadow: 0 0 12px #ffe382, 4px 4px #111026; font-size: 21px; font-weight: 900; line-height: 1; }
 .lab-quest-marker::after { content: ""; position: absolute; left: 50%; top: 100%; width: 8px; height: 8px; transform: translate(-50%, -50%) rotate(45deg); background: #ffd870; border-right: 3px solid #fff0af; border-bottom: 3px solid #fff0af; }
+.route-quest-marker { position: absolute; z-index: 15; width: 27px; height: 33px; display: grid; place-items: center; color: #211638; background: #ffd870; border: 4px solid #fff0af; box-shadow: 0 0 12px #ffe382, 4px 4px #111026; font-size: 21px; font-weight: 900; line-height: 1; }
+.route-quest-marker::after { content: ""; position: absolute; left: 50%; top: 100%; width: 8px; height: 8px; transform: translate(-50%, -50%) rotate(45deg); background: #ffd870; border-right: 3px solid #fff0af; border-bottom: 3px solid #fff0af; }
+.history-quest-marker { left: 50%; top: -38px; transform: translateX(-50%); }
+.research-quest-marker { left: -12px; top: 46%; transform: translate(-100%, -50%); }
 .lab-status-light { position: absolute; right: 4%; top: 9%; width: 7px; height: 7px; background: #7b3d4e; border: 2px solid #1d2638; }
 .campus-lab.is-complete .lab-status-light { background: var(--lab-color); box-shadow: 0 0 7px var(--lab-color); }
 .campus-lab.is-locked { filter: saturate(.42) brightness(.72) drop-shadow(7px 8px 0 rgb(4 9 17 / .48)); }
@@ -449,7 +453,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .voice-note-bubble { animation: voice-rise .8s steps(6) forwards; }
-  .lab-quest-marker { animation: quest-bob .85s steps(2) infinite; }
+  .lab-quest-marker, .route-quest-marker { animation: quest-bob .85s steps(2) infinite; }
 }
 
 @media (hover: none), (pointer: coarse) {

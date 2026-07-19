@@ -64,6 +64,7 @@ export const PEOPLE_TRANSITION_MAX_X = 544
 export const RESEARCH_BOUNDS: MovementBounds = { minX: 68, maxX: 892, minY: 248, maxY: 424 }
 export const RESEARCH_SPAWNS: Record<ResearchSpawnId, SpawnPoint> = {
   'research-from-hub': { position: { x: 185, y: 350 }, direction: 'right' },
+  'research-from-ending': { position: { x: 746, y: 364 }, direction: 'right' },
 }
 export const RESEARCH_FUTURE_DOORS = [
   { id: 'reinforcement-learning', position: { x: 260, y: 324 }, interactionRadius: 65 },

@@ -68,3 +68,33 @@ export function playVoiceNote(enabled: boolean, frequency: number) {
   oscillator.stop(now + 0.35)
   harmony.stop(now + 0.35)
 }
+
+type EndingCue = 'gate' | 'impact' | 'reveal' | 'core'
+
+export function playEndingCue(enabled: boolean, cue: EndingCue) {
+  if (!enabled || typeof AudioContext === 'undefined') return
+  const ctx = getContext()
+  const now = ctx.currentTime
+  const voices = cue === 'gate'
+    ? [{ frequency: 72, target: 144, duration: 1.25, volume: 0.026, type: 'sawtooth' as OscillatorType }, { frequency: 288, target: 576, duration: .7, volume: 0.012, type: 'triangle' as OscillatorType }]
+    : cue === 'impact'
+      ? [{ frequency: 58, target: 36, duration: .55, volume: 0.045, type: 'square' as OscillatorType }, { frequency: 94, target: 48, duration: .4, volume: 0.018, type: 'sawtooth' as OscillatorType }]
+      : cue === 'reveal'
+        ? [{ frequency: 82, target: 110, duration: 2.6, volume: 0.022, type: 'triangle' as OscillatorType }, { frequency: 123, target: 165, duration: 2.4, volume: 0.014, type: 'sine' as OscillatorType }]
+        : [{ frequency: 196, target: 392, duration: 1.8, volume: 0.018, type: 'sine' as OscillatorType }, { frequency: 294, target: 588, duration: 1.55, volume: 0.009, type: 'triangle' as OscillatorType }]
+
+  for (const voice of voices) {
+    const oscillator = ctx.createOscillator()
+    const gain = ctx.createGain()
+    oscillator.type = voice.type
+    oscillator.frequency.setValueAtTime(voice.frequency, now)
+    oscillator.frequency.exponentialRampToValueAtTime(voice.target, now + voice.duration)
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(voice.volume, now + Math.min(.12, voice.duration / 4))
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + voice.duration)
+    oscillator.connect(gain)
+    gain.connect(ctx.destination)
+    oscillator.start(now)
+    oscillator.stop(now + voice.duration + .02)
+  }
+}

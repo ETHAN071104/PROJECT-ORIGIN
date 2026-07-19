@@ -1,8 +1,9 @@
 export type LabId = 'cv' | 'ml' | 'nlp' | 'dl'
+export type Language = 'en' | 'zh-CN'
 export type HubSpawnId = 'hub-default' | 'hub-from-cv' | 'hub-from-ml' | 'hub-from-nlp' | 'hub-from-dl' | 'hub-from-history' | 'hub-from-research'
 export type HistorySpawnId = 'history-events-from-hub' | 'history-events-from-people'
 export type PeopleSpawnId = 'people-from-events'
-export type ResearchSpawnId = 'research-from-hub'
+export type ResearchSpawnId = 'research-from-hub' | 'research-from-ending'
 export type WorldMapId = 'hub' | 'history' | 'people' | 'research'
 export type WorldSpawnId = HubSpawnId | HistorySpawnId | PeopleSpawnId | ResearchSpawnId
 
@@ -50,6 +51,8 @@ export interface SaveData {
   stageProgress: LabProgress
   achievements: string[]
   audioEnabled: boolean
+  language: Language
+  endingCompleted: boolean
   worldProgress: WorldProgress
 }
 
@@ -98,7 +101,12 @@ export type GameAction =
   | { type: 'OPEN_RESEARCH' }
   | { type: 'READ_HISTORY_ENTRY'; id: string }
   | { type: 'REACH_FINAL_GATE' }
+  | { type: 'START_ENDING' }
+  | { type: 'COMPLETE_ENDING' }
+  | { type: 'CONTINUE_EXPLORING' }
+  | { type: 'END_ENDING_TO_TITLE' }
   | { type: 'TOGGLE_AUDIO' }
+  | { type: 'SET_LANGUAGE'; language: Language }
 
 export interface DialogueLine {
   speaker: string

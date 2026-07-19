@@ -14,10 +14,10 @@ This is a playable introduction to artificial intelligence, not a traditional co
 
 - Audience: teenagers, AI beginners, and the general public.
 - Expected playtime: 20-30 minutes.
-- Language: English only for the MVP.
+- Language: English and Simplified Chinese, selectable from Home → Settings and persisted with the save.
 - Learning principle: let the player perform an activity first. Explain the concept only after completion.
 - Playable labs: Computer Vision, Machine Learning, Natural Language Processing, and Deep Learning.
-- Research is a separate exploration branch with sealed future modules and ARCHIVE ZERO; it is not a fifth Lab or the final ending in this phase.
+- Research is a separate exploration branch with sealed future modules and ARCHIVE ZERO; it is not a fifth Lab. ARCHIVE ZERO contains the single canonical ending after all four Labs are complete.
 
 ## Non-negotiable constraints
 
@@ -26,7 +26,7 @@ This is a playable introduction to artificial intelligence, not a traditional co
 - Desktop movement: WASD or arrow keys.
 - Desktop interaction: Enter, E, or Space.
 - Mobile input: virtual D-pad, one contextual interaction button, and a persistent Voice button after NLP completion.
-- Desktop and touch movement is continuous while a direction remains held, uses delta-time normalization, and resets on focus or visibility loss.
+- Desktop and touch exploration movement is continuous while a direction remains held, uses delta-time normalization, and resets on focus or visibility loss. The ending deliberately constrains the player to three short forward inputs.
 - No backend, accounts, AI API, 3D, game engine, remote image assets, coins, inventory, health, combat, character levels, or copyrighted game assets.
 - Store progress in localStorage.
 - Use React, Vite, TypeScript, DOM/CSS, optional Canvas, and Web Audio.
@@ -54,6 +54,8 @@ This is a playable introduction to artificial intelligence, not a traditional co
   stageProgress: { cv: number; ml: number; nlp: number; dl: number }
   achievements: string[]
   audioEnabled: boolean
+  language: 'en' | 'zh-CN'
+  endingCompleted: boolean
   worldProgress: {
     hallVisited: boolean
     researchVisited: boolean
@@ -139,6 +141,24 @@ People of AI Gallery
 - Every map boundary uses centralized named spawns. Arrivals face away from the boundary and begin outside its immediate trigger.
 - Lab, exhibit, People, Research, Final Gate, and transition interactions are optional unless explicitly required for Lab progression.
 
+## ARCHIVE ZERO final ending
+
+- The ending is eligible only after CV, ML, NLP, and DL are complete and the player reaches ARCHIVE ZERO in Research.
+- The Final Gate scan displays `FOUNDATIONAL INTELLIGENCE RESTORED` and `ORIGIN RECORD DETECTED`, then explicitly opens the `ORIGIN PATH`.
+- Ordinary HUD, contextual prompts, Voice, and free map movement are hidden during the cinematic.
+- Inside the dark Origin Chamber, the player receives control for exactly three short forward inputs using W, Arrow Up, or the single touch-forward control. Other directions do nothing.
+- ORI softly contacts an enormous object. A camera reveal identifies it as the leg of a gigantic original humanoid robot, with additional silent machine silhouettes behind it.
+- One giant eye/core glows softly and may display `AWAITING BUILDERS`. The reveal has no attack, combat, villain speech, secret route, or second ending.
+- Generated Web Audio cues accompany the gate, impact, reveal, and core activation and always respect Sound On/Off.
+- Timed ending cards display:
+  1. `You are still small. But every great intelligence begins somewhere.`
+  2. `Keep learning. Someday, you may stand among giants.`
+  3. `Become one of the AI developers who build the future.`
+  4. `PROJECT ORIGIN / Every AI has an origin. This is yours.`
+- After the logo, `RETURN TO TITLE` and `CONTINUE EXPLORING` are both keyboard- and touch-accessible.
+- Reaching the ending options persists `endingCompleted = true`. Continue Exploring returns to the safe `research-from-ending` spawn before ARCHIVE ZERO, and loading that save never replays the ending automatically.
+- A completed gate remains softly active with `ORIGIN RECORD ACCESSED`; replay is possible only by explicitly interacting with ARCHIVE ZERO again.
+
 ## Contextual interaction and communication HUD
 
 - One centralized `activeInteractable` selection chooses the nearest in-range target, then uses priority and ID for deterministic ties.
@@ -153,7 +173,16 @@ People of AI Gallery
 - A non-standalone mobile browser shows an explicit full-screen preparation gate before play. Fullscreen is requested only after the player presses its button.
 - Unsupported or rejected fullscreen requests expose Install App and Continue in Browser fallbacks. Fullscreen exit clears held input, pauses exploration in place, and offers re-entry or browser continuation without resetting progress.
 - Installed standalone mode skips the preparation gate but keeps the portrait rotation guard and safe-area handling.
+- Holding a virtual D-pad direction continuously moves the player until release or cancellation. Game controls suppress browser text selection, tap highlight, drag, context-menu, and touch callout behavior.
+- DL Neural Path touch input follows the finger across grid cells, supports reversing one cell while dragging, and accepts any valid non-crossing route that joins matching ports.
 - The production build includes a standalone web manifest, 192 px and 512 px icons, service worker, and an offline application shell. The game has no API response cache.
+
+## Mobile guidance and Deep Learning clarity
+
+- After the first Lab is completed, an exclamation marker guides the player toward the optional History entrance until that map has been visited.
+- After all four Labs are completed, an exclamation marker guides the player toward Research until that map has been visited.
+- DL Power the Network mixes correct maximum-signal choices between upper and lower buttons; the correct sequence is not visually predictable by row.
+- DL Tune the Neuron keeps the recovered number unreadable until its displayed clarity reaches 98 percent or higher.
 
 ## Computer Vision Lab
 
@@ -178,3 +207,4 @@ CV progress uses `stageProgress.cv` values from 0 through 4. Each successfully c
 - localStorage save/continue.
 - Complete Computer Vision Lab stages.
 - Complete CV, ML, NLP, and DL stage sequences.
+- Complete ARCHIVE ZERO origin reveal, final message, persisted completion state, and post-ending exploration return.
