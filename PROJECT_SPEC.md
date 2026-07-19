@@ -1,5 +1,11 @@
 # PROJECT ORIGIN Product Specification
 
+## World atmosphere contract
+
+The AI Academy Hub uses a centralized pixel-art atmosphere system with Day, Dusk, and Night. Research temporarily reuses its Sandstorm preset for a story event; History and People retain their archive palettes. The system controls palette grading, emissive accents, simple shadows, bounded particles, ambient wind, and music variation. It is not a physical lighting engine, clock, or random weather simulator, and Lab mini-games keep their own palettes.
+
+Progression begins at Night. Before CV, newly completed Labs alternate the Hub between Dusk and Night. CV unlocks and activates Day; later Lab completions cycle Day, Dusk, and Night. DL activates the optional Hub environment terminal for manual selection and displays a quest marker until the terminal is opened. Sandstorm is story/debug only and plays for ten seconds on the Research map after the first Research entry following DL. Visual transitions last 3-5 seconds with reduced-motion fallback, mobile defaults to Low particles, and the state migrates safely inside the existing save.
+
 ## Product lock
 
 PROJECT ORIGIN is a browser-based pixel-art educational RPG. Its tagline is "Every AI has an origin. This is yours."
@@ -166,6 +172,15 @@ People of AI Gallery
 - The E prompt and touch interaction button do not render in empty space or while a blocking panel is open.
 - Completing NLP permanently unlocks the F Voice ability on Hub, History Events, People Gallery, and Research exploration maps.
 - Voice chooses do, re, mi, fa, or so, creates pixel music particles above the robot, respects the audio setting, and uses a 550 ms anti-spam cooldown.
+
+## Procedural background music
+
+- Background music is synthesized locally with the native Web Audio API. It uses no downloaded tracks, samples, remote dependencies, or external generation service.
+- The recurring original motif is approximately C â†’ E-flat â†’ G â†’ D and appears in four 20-45 second prototypes: `ORIGIN SIGNAL`, `ACADEMY NIGHT`, `ACADEMY DAY`, and `STAND AMONG GIANTS`.
+- Music creates no AudioContext until a pointer, touch, or keyboard gesture. It shares one context with existing sound effects, stays quieter than them, crossfades between themes, and responds to Sound On/Off.
+- The Academy arrangement supports base, CV, ML, NLP, and DL layers. CV changes the routed theme from Night to Day; the remaining module flags add rhythm, response, and full-harmony layers without changing Lab progression.
+- Visibility loss and the mobile immersive pause stop scheduled music safely. Returning to play resumes the requested theme without stacking duplicate loops.
+- A development-only test panel is available through `?musicTest=1`; it is absent from production builds.
 
 ## Mobile immersion and installation
 

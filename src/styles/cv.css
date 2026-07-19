@@ -68,3 +68,11 @@
 @keyframes boss-auto-scan-pass { from { transform: translate3d(0, -14px, 0); } to { transform: translate3d(0, 310px, 0); } }
 @keyframes vision-scan-pass { from { transform: translateY(-16px); } to { transform: translateY(308px); } }
 @keyframes vision-eye-pulse { 50% { filter: brightness(1.35); } }
+
+/* Lane markers converge with the trapezoid road instead of reading as screen-space bars. */
+.boss-lane-left { transform: skewX(-10deg); transform-origin: 50% 100%; }
+.boss-lane-right { transform: skewX(10deg); transform-origin: 50% 100%; }
+.boss-lane-line i:first-child { transform: scaleX(.58); }
+.boss-lane-line i:nth-child(2) { transform: scaleX(.76); }
+.boss-lane-line i:nth-child(3) { transform: scaleX(1); }
+.boss-lane-line i:nth-child(4) { transform: scaleX(1.18); }

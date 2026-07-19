@@ -15,11 +15,15 @@ import { ResearchMapScene } from './scenes/ResearchMapScene'
 import { HistoryMapScene } from './scenes/HistoryMapScene'
 import { PeopleMapScene } from './scenes/PeopleMapScene'
 import { TitleScreen } from './scenes/TitleScreen'
+import { MusicController } from './components/MusicController'
+import { MusicTestPanel } from './components/MusicTestPanel'
+import { AtmosphereDebugPanel } from './world/atmosphere/AtmosphereDebugPanel'
 
 export default function App() {
   const { state } = useGame()
   return (
     <GameViewport>
+      <MusicController />
       {state.screen === 'TITLE' && <TitleScreen />}
       {state.screen === 'INTRO' && <IntroScene />}
       {state.screen === 'NAME_ENTRY' && <NameEntryScene />}
@@ -34,6 +38,8 @@ export default function App() {
       )}
       {state.screen === 'LAB_COMPLETE' && <LabCompleteScene />}
       {state.screen === 'ENDING' && <EndingScene />}
+      <MusicTestPanel />
+      <AtmosphereDebugPanel />
     </GameViewport>
   )
 }

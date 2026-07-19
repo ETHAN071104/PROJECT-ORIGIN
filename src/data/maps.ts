@@ -10,7 +10,7 @@ export interface SpawnPoint {
 }
 
 export interface HubTarget {
-  id: LabId | 'east-gate' | 'history-gate'
+  id: LabId | 'east-gate' | 'history-gate' | 'atmosphere-terminal'
   position: Point
   interactionRadius: number
 }
@@ -24,6 +24,7 @@ export const HUB_TARGETS: HubTarget[] = [
   { id: 'dl', position: { x: 223, y: 377 }, interactionRadius: 50 },
   { id: 'east-gate', position: { x: 872, y: 294 }, interactionRadius: 70 },
   { id: 'history-gate', position: { x: 488, y: 414 }, interactionRadius: 58 },
+  { id: 'atmosphere-terminal', position: { x: 645, y: 362 }, interactionRadius: 48 },
 ]
 
 export const HUB_EAST_TRANSITION_X = 884

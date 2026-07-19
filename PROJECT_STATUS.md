@@ -2,6 +2,16 @@
 
 Updated: 2026-07-19
 
+## World Atmosphere System
+
+- Centralized Day, Dusk, and Night presets now serve the AI Academy Hub; Research temporarily reuses Sandstorm, while History and People remain unchanged.
+- Added 3-5 second crossfades, authored emissive light pools, simple shadows, bounded weather particles, reduced-motion behavior, and Low/Medium/High quality.
+- Before CV, Lab completions alternate Dusk/Night. CV activates Day; later completions cycle Day/Dusk/Night. DL activates the Hub `ENV` terminal and its one-time discovery marker.
+- Added the one-time ten-second Sandstorm on the Research map after the first post-DL entry with backward-compatible persistence.
+- Connected atmosphere to the procedural score with contextual low-pass filtering and a quiet wind bed; indoor maps disable outdoor ambience.
+- Added development-only `?atmosphereTest=1` controls and focused unit coverage.
+- Fixed the CV difference target alignment, correctly converging left/right perspective lane markings, Hub Research quest marker placement, simplified Archive Zero silhouette, and moved the Ending walk control to the right.
+
 ## Completed systems
 
 - React, Vite, and strict TypeScript browser application with a reducer-driven game state machine.
@@ -112,6 +122,16 @@ Updated: 2026-07-19
 - NLP completion exposes permanent desktop and touch Voice controls during Hub, History Events, People Gallery, and Research exploration. Dialogue/panels, mini-games, title, intro, and result scenes do not expose it.
 - Voice produces randomized do/re/mi/fa/so tones, three pixel-note particles, respects Sound On/Off, and applies a 550 ms cooldown.
 
+## Completed procedural chiptune prototype
+
+- A shared, lazy Web Audio runtime now serves both the preserved sound effects and original background music without duplicate AudioContext instances or remote audio assets.
+- Four deterministic themes are implemented: `ORIGIN SIGNAL` at 76 BPM, `ACADEMY NIGHT` at 72 BPM, `ACADEMY DAY` at 78 BPM, and `STAND AMONG GIANTS` at 70 BPM. Their 32-beat loops run approximately 24.6-27.4 seconds.
+- The recurring C, E-flat, G, D motif is voiced through restrained oscillator pads, triangle bass, square lead, bell overtones, pulses, and locally generated filtered noise.
+- Title/intro uses Origin Signal, pre-CV Academy play uses Night, post-CV Academy play uses Day, and the ending uses Stand Among Giants. ML, NLP, and DL progression flags add rhythm, response, and fuller harmony layers.
+- Music begins only after pointer, touch, or keyboard input. Theme changes use a one-second fade-out and 1.5-second fade-in, repeated selection does not stack, master music volume defaults to 35 percent, and the existing Sound preference mutes/resumes music.
+- Visibility changes and the mobile immersive pause stop scheduled voices safely and resume the desired theme afterward. Existing effects remain on the shared context and keep their prior behavior.
+- The development-only `?musicTest=1` panel provides initialization, four theme buttons, Stop, volume control, and visible initialization state. It is compiled out of the production player experience.
+
 ## Completed mobile immersion and PWA shell
 
 - Touch-mobile detection combines coarse-pointer, hover, touch-point, and viewport signals; standalone mode uses display-mode plus the safe iOS standalone flag.
@@ -161,7 +181,7 @@ Updated: 2026-07-19
 - `src/data/cvLab.ts`, `src/data/mlLab.ts`, `src/data/nlpLab.ts`, and `src/data/dlLab.ts` keep deterministic teaching content and answer helpers separate from presentation.
 - `src/scenes/HubScene.tsx`, `src/scenes/HistoryMapScene.tsx`, `src/scenes/PeopleMapScene.tsx`, and `src/scenes/ResearchMapScene.tsx` own four-map traversal, while the four Lab scenes keep their independent sequential flows.
 - `src/scenes/EndingScene.tsx` owns the timed phase sequence, three-step input, giant reveal, final text, and exit choices; `src/styles/ending.css` owns its procedural pixel-art staging.
-- `src/audio/audio.ts` generates the ending gate, impact, reveal, and core cues without remote audio assets.
+- `src/audio/audio.ts` preserves generated effects; `src/audio/audioContext.ts` owns the shared lazy context; `MusicEngine.ts`, `musicThemes.ts`, `instruments.ts`, and `sequencer.ts` own procedural background music.
 - `src/game/interactions.ts` and `src/components/InteractionPrompt.tsx` own contextual target selection and the single shared E HUD contract.
 - `src/game/immersive.ts` and `src/components/GameViewport.tsx` own touch-mobile detection, fullscreen/install state, input pausing, and standalone launch behavior.
 - `src/hooks/useVoiceExpression.ts` owns NLP-unlocked `F` note selection, playback, and the short-lived map expression bubble.
@@ -207,7 +227,7 @@ Storage key: `project-origin-save-v1`
 - The complete four-Lab curriculum click-through was not rerun because the Lab mini-games were deliberately unchanged; eligibility, migration, persistence, and post-ending navigation are covered by reducer/storage tests, with the final cinematic covered by a non-persisting development preview.
 - iOS/iPadOS does not expose the standard install prompt or general element fullscreen consistently; the game therefore shows Add to Home Screen guidance and preserves Continue in Browser rather than claiming success.
 - Service workers and native installation require a secure production origin (HTTPS, with localhost accepted for development). Vite development mode intentionally does not register the service worker to avoid stale local bundles.
-- Audio remains intentionally limited to generated tones.
+- Audio remains entirely procedural and depends on Web Audio support. Browser autoplay policies require a real user gesture, and mobile operating systems may suspend the context while the tab or app is backgrounded.
 - Collision is deliberately simple and rectangular for the hackathon scope.
 - Prediction bars, factory classification, and all displayed model behavior are transparent deterministic teaching simulations, not real inference.
 
@@ -220,7 +240,7 @@ Storage key: `project-origin-save-v1`
 ## Current revision verification
 
 - Production build passes strict TypeScript checks.
-- 13 Vitest files pass with 76 total tests.
+- 16 Vitest files pass with 84 total tests.
 - Reducer coverage verifies Hub/History/People/Research navigation plus ending eligibility, Final Gate triggering, completion persistence, safe Continue Exploring, Return to Title, and no automatic replay on Continue.
 - Storage coverage verifies legacy corridor-spawn migration, History/People persistence without Research access, safe Hub fallback for invalid locked Research, default-false ending migration, and preservation of a completed ending at `research-from-ending`.
 - Archive-data coverage verifies exactly eight Lab exhibits, 12 chronological event records, eight primary contributor records, unique IDs, and historically careful 1986 backpropagation wording.
@@ -235,6 +255,7 @@ Storage key: `project-origin-save-v1`
 - Ending layout checks passed at 1920 x 1080, 1366 x 768, 844 x 390, and 740 x 360 with no logical-frame overflow; the portrait guard passed at 390 x 844.
 - PWA output contains a standalone manifest, valid 192 x 192 and 512 x 512 PNG icons, service worker, and production offline-shell resources.
 - Title-page browser QA verified both record dialogs, safe new-tab attributes on both creator links, initial focus, Escape closing, focus return, and the menu staying inside the fixed frame.
+- The development music panel was browser-checked for its pre-gesture `WAITING FOR GESTURE` state, all four theme controls, Stop, the 35 percent volume control, and a clean console. The automated browser did not expose a running audio output context, so final subjective listening remains a real-device/manual QA step.
 
 ## Prior verification archive
 

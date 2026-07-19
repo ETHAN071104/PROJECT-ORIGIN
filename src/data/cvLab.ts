@@ -91,7 +91,7 @@ export const CLASSIFICATION_CARDS: ClassificationCard[] = [
 export const CLASSIFICATION_CATEGORIES: ClassificationCategory[] = ['Living', 'Machine', 'Object']
 
 export const DIFFERENCE_TARGETS: DifferenceTarget[] = [
-  { id: 'lamp', label: 'Missing street lamp', rect: { x: 69, y: 12, width: 18, height: 49 } },
+  { id: 'lamp', label: 'Missing street lamp', rect: { x: 60, y: 15, width: 15, height: 52 } },
   { id: 'car-detail', label: 'Changed car window', rect: { x: 40, y: 52, width: 23, height: 20 } },
   { id: 'tree-branch', label: 'Changed tree branch', rect: { x: 7, y: 17, width: 22, height: 43 } },
 ]

@@ -350,4 +350,55 @@ describe('Project Origin navigation state machine', () => {
     expect(state.save.achievements).toContain('AI_AWAKENED')
     expect(state.save.achievements.filter((item) => item === 'AI_AWAKENED')).toHaveLength(1)
   })
+
+  it('unlocks atmosphere progression and only allows manual restored modes', () => {
+    let state = createInitialState(null)
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'cv' })
+    state = gameReducer(state, { type: 'COMPLETE_CV_LAB' })
+    expect(state.save.atmosphereMode).toBe('day')
+    expect(state.save.unlockedAtmospheres).toEqual(['day', 'dusk', 'night'])
+
+    state = gameReducer(state, { type: 'SET_ATMOSPHERE_MODE', mode: 'dusk' })
+    expect(state.save.atmosphereMode).toBe('dusk')
+    state = gameReducer(state, { type: 'SET_ATMOSPHERE_MODE', mode: 'night' })
+    expect(state.save.atmosphereMode).toBe('night')
+    expect(gameReducer(state, { type: 'SET_ATMOSPHERE_MODE', mode: 'sandstorm' })).toBe(state)
+  })
+
+  it('persists particle quality and the one-time Research sandstorm flag', () => {
+    let state = createInitialState(null)
+    state = gameReducer(state, { type: 'SET_PARTICLE_QUALITY', quality: 'low' })
+    state = gameReducer(state, { type: 'MARK_RESEARCH_SANDSTORM_SEEN' })
+    expect(state.save.particleQuality).toBe('low')
+    expect(state.save.hasSeenResearchSandstorm).toBe(true)
+    expect(gameReducer(state, { type: 'MARK_RESEARCH_SANDSTORM_SEEN' })).toBe(state)
+  })
+
+  it('advances the campus sky after each newly completed Lab in completion order', () => {
+    let state = createInitialState(null)
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'ml' })
+    state = gameReducer(state, { type: 'COMPLETE_ML_LAB' })
+    expect(state.save.atmosphereMode).toBe('dusk')
+    state = gameReducer(state, { type: 'LEAVE_LAB' })
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'nlp' })
+    state = gameReducer(state, { type: 'COMPLETE_NLP_LAB' })
+    expect(state.save.atmosphereMode).toBe('night')
+    state = gameReducer(state, { type: 'LEAVE_LAB' })
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'cv' })
+    state = gameReducer(state, { type: 'COMPLETE_CV_LAB' })
+    expect(state.save.atmosphereMode).toBe('day')
+    state = gameReducer(state, { type: 'LEAVE_LAB' })
+    state = gameReducer(state, { type: 'ENTER_LAB', lab: 'dl' })
+    state = gameReducer(state, { type: 'COMPLETE_DL_LAB' })
+    expect(state.save.atmosphereMode).toBe('dusk')
+  })
+
+  it('clears the ENV discovery marker only after the unlocked terminal is opened', () => {
+    let state = createInitialState(null)
+    expect(gameReducer(state, { type: 'ACKNOWLEDGE_ATMOSPHERE_TERMINAL' })).toBe(state)
+    state = { ...state, save: { ...state.save, completedLabs: { cv: true, ml: true, nlp: true, dl: true } } }
+    state = gameReducer(state, { type: 'ACKNOWLEDGE_ATMOSPHERE_TERMINAL' })
+    expect(state.save.hasUsedAtmosphereTerminal).toBe(true)
+    expect(gameReducer(state, { type: 'ACKNOWLEDGE_ATMOSPHERE_TERMINAL' })).toBe(state)
+  })
 })

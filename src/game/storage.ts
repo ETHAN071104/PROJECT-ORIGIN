@@ -1,4 +1,10 @@
 import type { SaveData } from './types'
+import {
+  defaultParticleQuality,
+  isAtmosphereMode,
+  isParticleQuality,
+  unlockedAtmospheresForLabs,
+} from '../world/atmosphere/atmospherePresets'
 
 export const SAVE_KEY = 'project-origin-save-v1'
 
@@ -11,6 +17,11 @@ export const emptySave = (audioEnabled = true, language: SaveData['language'] = 
   audioEnabled,
   language,
   endingCompleted: false,
+  atmosphereMode: 'night',
+  unlockedAtmospheres: ['night'],
+  hasSeenResearchSandstorm: false,
+  hasUsedAtmosphereTerminal: false,
+  particleQuality: defaultParticleQuality(),
   worldProgress: {
     hallVisited: false,
     researchVisited: false,
@@ -27,10 +38,11 @@ export function loadSave(): SaveData | null {
     if (!raw) return null
     const parsed = JSON.parse(raw) as Partial<SaveData>
     if (!parsed.completedLabs || !parsed.stageProgress) return null
+    const hasValidAtmosphereMode = isAtmosphereMode(parsed.atmosphereMode)
     const parsedWorld = parsed.worldProgress && typeof parsed.worldProgress === 'object'
       ? parsed.worldProgress
       : undefined
-    const save = {
+    const save: SaveData = {
       ...emptySave(parsed.audioEnabled ?? true),
       ...parsed,
       completedLabs: { ...emptySave().completedLabs, ...parsed.completedLabs },
@@ -38,6 +50,13 @@ export function loadSave(): SaveData | null {
       achievements: Array.isArray(parsed.achievements) ? parsed.achievements : [],
       language: parsed.language === 'zh-CN' ? 'zh-CN' as const : 'en' as const,
       endingCompleted: parsed.endingCompleted === true,
+      atmosphereMode: isAtmosphereMode(parsed.atmosphereMode) ? parsed.atmosphereMode : 'night',
+      unlockedAtmospheres: Array.isArray(parsed.unlockedAtmospheres)
+        ? parsed.unlockedAtmospheres.filter(isAtmosphereMode)
+        : [],
+      hasSeenResearchSandstorm: parsed.hasSeenResearchSandstorm === true,
+      hasUsedAtmosphereTerminal: parsed.hasUsedAtmosphereTerminal === true,
+      particleQuality: isParticleQuality(parsed.particleQuality) ? parsed.particleQuality : defaultParticleQuality(),
       worldProgress: {
         ...emptySave().worldProgress,
         ...parsedWorld,
@@ -97,6 +116,15 @@ export function loadSave(): SaveData | null {
         save.worldProgress.lastMap = 'hub'
         save.worldProgress.lastSpawn = 'hub-default'
       }
+    }
+    const progressionUnlocks = unlockedAtmospheresForLabs(save.completedLabs)
+    save.unlockedAtmospheres = Array.from(new Set([
+      ...save.unlockedAtmospheres.filter((mode) => mode !== 'sandstorm'),
+      ...progressionUnlocks,
+    ]))
+    if (!hasValidAtmosphereMode || !save.unlockedAtmospheres.includes(save.atmosphereMode) || save.atmosphereMode === 'sandstorm') {
+      const completedCount = Object.values(save.completedLabs).filter(Boolean).length
+      save.atmosphereMode = save.completedLabs.cv ? 'day' : completedCount % 2 === 1 ? 'dusk' : 'night'
     }
     return save
   } catch {

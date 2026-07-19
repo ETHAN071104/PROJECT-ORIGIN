@@ -1,5 +1,7 @@
 export type LabId = 'cv' | 'ml' | 'nlp' | 'dl'
 export type Language = 'en' | 'zh-CN'
+export type AtmosphereMode = 'day' | 'dusk' | 'night' | 'sandstorm'
+export type ParticleQuality = 'low' | 'medium' | 'high'
 export type HubSpawnId = 'hub-default' | 'hub-from-cv' | 'hub-from-ml' | 'hub-from-nlp' | 'hub-from-dl' | 'hub-from-history' | 'hub-from-research'
 export type HistorySpawnId = 'history-events-from-hub' | 'history-events-from-people'
 export type PeopleSpawnId = 'people-from-events'
@@ -53,6 +55,11 @@ export interface SaveData {
   audioEnabled: boolean
   language: Language
   endingCompleted: boolean
+  atmosphereMode: AtmosphereMode
+  unlockedAtmospheres: AtmosphereMode[]
+  hasSeenResearchSandstorm: boolean
+  hasUsedAtmosphereTerminal: boolean
+  particleQuality: ParticleQuality
   worldProgress: WorldProgress
 }
 
@@ -107,6 +114,10 @@ export type GameAction =
   | { type: 'END_ENDING_TO_TITLE' }
   | { type: 'TOGGLE_AUDIO' }
   | { type: 'SET_LANGUAGE'; language: Language }
+  | { type: 'SET_ATMOSPHERE_MODE'; mode: AtmosphereMode }
+  | { type: 'SET_PARTICLE_QUALITY'; quality: ParticleQuality }
+  | { type: 'MARK_RESEARCH_SANDSTORM_SEEN' }
+  | { type: 'ACKNOWLEDGE_ATMOSPHERE_TERMINAL' }
 
 export interface DialogueLine {
   speaker: string

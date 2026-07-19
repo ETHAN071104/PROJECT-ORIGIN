@@ -21,9 +21,12 @@ import { allLabsComplete, foundationsComplete } from '../game/reducer'
 import type { LabId, Point } from '../game/types'
 import { usePlayerMovement } from '../hooks/usePlayerMovement'
 import { isVoiceAbilityAvailable, useVoiceExpression } from '../hooks/useVoiceExpression'
+import { AtmosphereRenderer } from '../world/atmosphere/AtmosphereRenderer'
+import { useAtmosphere } from '../world/atmosphere/AtmosphereProvider'
 
 export function HubScene() {
   const { state, dispatch } = useGame()
+  const atmosphere = useAtmosphere()
   const dayUnlocked = state.save.completedLabs.cv
   const learningRestored = state.save.completedLabs.ml
   const languageRestored = state.save.completedLabs.nlp
@@ -31,11 +34,20 @@ export function HubScene() {
   const routesPowered = allLabsComplete(state.save)
   const historyQuestAvailable = Object.values(state.save.completedLabs).some(Boolean) && !state.save.worldProgress.hallVisited
   const researchQuestAvailable = routesPowered && !state.save.worldProgress.researchVisited
+  const environmentQuestAvailable = state.save.completedLabs.dl && !state.save.hasUsedAtmosphereTerminal
   const foundationStatus = `CV ${state.save.completedLabs.cv ? 'OK' : '--'} / ML ${state.save.completedLabs.ml ? 'OK' : '--'} / NLP ${state.save.completedLabs.nlp ? 'OK' : '--'}`
   const transitioned = useRef(false)
   const spawn = HUB_SPAWNS[state.hubSpawn]
   const voiceAvailable = isVoiceAbilityAvailable(languageRestored, true)
   const voice = useVoiceExpression(voiceAvailable, state.save.audioEnabled)
+  const [atmospherePanelOpen, setAtmospherePanelOpen] = useState(false)
+
+  const openAtmosphereTerminal = useCallback(() => {
+    if (!state.save.completedLabs.dl) return
+    if (!state.save.hasUsedAtmosphereTerminal) dispatch({ type: 'ACKNOWLEDGE_ATMOSPHERE_TERMINAL' })
+    playTone(state.save.audioEnabled, 'confirm')
+    setAtmospherePanelOpen(true)
+  }, [dispatch, state.save.audioEnabled, state.save.completedLabs.dl, state.save.hasUsedAtmosphereTerminal])
 
   const candidates = useMemo<readonly InteractionCandidate[]>(() => HUB_TARGETS.map((target) => {
     if (target.id === 'east-gate') return {
@@ -52,6 +64,13 @@ export function HubScene() {
       priority: 90,
       actionLabel: 'Enter AI History Archive',
     }
+    if (target.id === 'atmosphere-terminal') return {
+      ...target,
+      id: 'atmosphere-terminal',
+      type: 'terminal' as const,
+      priority: 75,
+      actionLabel: state.save.completedLabs.dl ? 'Use Environment Control' : 'Environment Control is dormant',
+    }
     if (target.id === 'dl') return {
       ...target,
       id: 'lab-dl',
@@ -66,7 +85,7 @@ export function HubScene() {
       priority: 70,
       actionLabel: `Enter ${target.id.toUpperCase()} Lab`,
     }
-  }), [dlOnline, routesPowered])
+  }), [dlOnline, routesPowered, state.save.completedLabs.dl])
 
   const [activeInteractable, setActiveInteractable] = useState<ActiveInteractable | null>(() => (
     selectActiveInteractable(spawn.position, candidates)
@@ -122,6 +141,14 @@ export function HubScene() {
     if (!activeInteractable || transitioned.current) return
     if (activeInteractable.id === 'east-gate') return enterResearchRoute()
     if (activeInteractable.id === 'history-gate') return enterHistoryRoute()
+    if (activeInteractable.id === 'atmosphere-terminal') {
+      if (!state.save.completedLabs.dl) {
+        playTone(state.save.audioEnabled, 'incorrect')
+        return
+      }
+      openAtmosphereTerminal()
+      return
+    }
 
     const lab = activeInteractable.id.replace('lab-', '') as LabId
     if (lab === 'dl' && !dlOnline) {
@@ -130,10 +157,10 @@ export function HubScene() {
     }
     playTone(state.save.audioEnabled, 'confirm')
     dispatch({ type: 'ENTER_LAB', lab })
-  }, [activeInteractable, dispatch, dlOnline, enterHistoryRoute, enterResearchRoute, state.save.audioEnabled])
+  }, [activeInteractable, dispatch, dlOnline, enterHistoryRoute, enterResearchRoute, openAtmosphereTerminal, state.save.audioEnabled, state.save.completedLabs.dl])
 
   const movement = usePlayerMovement({
-    active: !transitioned.current,
+    active: !transitioned.current && !atmospherePanelOpen,
     initialPosition: spawn.position,
     initialDirection: spawn.direction,
     bounds: HUB_BOUNDS,
@@ -145,7 +172,9 @@ export function HubScene() {
 
   const mapClasses = [
     'hub-map',
-    dayUnlocked ? 'is-day' : 'is-night',
+    'atmosphere-host',
+    atmosphere.mode === 'night' ? 'is-night' : 'is-day',
+    `is-${atmosphere.mode}`,
     learningRestored ? 'has-learning' : '',
     languageRestored ? 'has-language' : '',
     routesPowered ? 'research-route-active' : '',
@@ -156,11 +185,12 @@ export function HubScene() {
       <div className="scene-hud campus-hud">
         <button type="button" className="hub-home-button" onClick={() => { playTone(state.save.audioEnabled, 'confirm'); dispatch({ type: 'RETURN_TO_TITLE' }) }}><i aria-hidden="true" />HOME</button>
         <div><span>UNIT</span><strong>{state.save.playerName}</strong></div>
-        <div className="hub-title"><span>AI ACADEMY</span><strong>{dayUnlocked ? 'DAY CAMPUS' : 'NIGHT CAMPUS'}</strong></div>
+        <div className="hub-title"><span>AI ACADEMY</span><strong>{`${atmosphere.mode.toUpperCase()} CAMPUS`}</strong></div>
         <div><span>LAB SIGNALS</span><strong>{Object.values(state.save.completedLabs).filter(Boolean).length} / 4</strong></div>
       </div>
 
-      <div className={mapClasses} aria-label={`${dayUnlocked ? 'Daytime' : 'Nighttime'} AI Academy campus map`}>
+      <div className={mapClasses} aria-label={`${atmosphere.mode} AI Academy campus map`}>
+        <AtmosphereRenderer map="hub" />
         <div className="campus-stars" aria-hidden="true" />
         <div className="campus-path path-north" /><div className="campus-path path-west" />
         <div className="campus-path path-southwest" /><div className="campus-path path-east" />
@@ -203,6 +233,10 @@ export function HubScene() {
         <div className="system-relay relay-one"><i /><i /><i /></div>
         <div className="system-relay relay-two"><i /><i /><i /></div>
         <div className="system-conduit conduit-one" /><div className="system-conduit conduit-two" />
+        <button type="button" className={`academy-atmosphere-terminal ${state.save.completedLabs.dl ? 'is-online' : ''}`} aria-label="Academy environment control terminal" onClick={openAtmosphereTerminal}>
+          {environmentQuestAvailable && <em className="env-quest-marker" aria-label="New environment control available">!</em>}
+          <i /><b>ENV</b><span>{state.save.completedLabs.dl ? atmosphere.mode.toUpperCase() : 'OFFLINE'}</span>
+        </button>
 
         <div ref={movement.playerRef} className="player-on-map" style={movement.playerStyle} data-player-direction={movement.direction}>
           <VoiceParticles expression={voice.expression} />
@@ -221,6 +255,13 @@ export function HubScene() {
         interactionLabel={activeInteractable?.actionLabel}
         onExpress={voiceAvailable ? voice.express : undefined}
       />
+      {atmospherePanelOpen && (
+        <section className="atmosphere-terminal-panel" role="dialog" aria-modal="true" aria-label="Academy environment control">
+          <span>ACADEMY SYSTEM</span><h2>ENVIRONMENT CONTROL</h2><p>Select a restored campus atmosphere.</p>
+          <div>{state.save.unlockedAtmospheres.filter((mode) => mode !== 'sandstorm').map((mode) => <button type="button" key={mode} className={atmosphere.mode === mode ? 'is-active' : ''} onClick={() => atmosphere.setMode(mode)}>{mode}</button>)}</div>
+          <button type="button" className="atmosphere-terminal-close" onClick={() => setAtmospherePanelOpen(false)}>CLOSE</button>
+        </section>
+      )}
     </div>
   )
 }

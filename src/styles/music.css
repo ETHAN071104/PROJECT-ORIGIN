@@ -1,0 +1,31 @@
+.music-test-panel {
+  position: absolute;
+  z-index: 70;
+  right: 10px;
+  bottom: 10px;
+  width: 236px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 10px;
+  color: #dffcff;
+  background: rgb(6 12 31 / .96);
+  border: 3px solid #54d8e8;
+  box-shadow: 5px 5px #030610, inset 0 0 0 2px #18395a;
+  font-size: 7px;
+}
+
+.music-test-panel p,
+.music-test-panel h2,
+.music-test-panel label,
+.music-test-panel output,
+.music-test-panel small { grid-column: 1 / -1; margin: 0; }
+.music-test-panel p { color: #69e6f0; letter-spacing: .12em; }
+.music-test-panel h2 { color: #fff; font-size: 14px; }
+.music-test-panel button { min-height: 27px; padding: 4px; color: #e7f9ff; background: #202a53; border: 2px solid #6376a2; box-shadow: 2px 2px #02040c; cursor: pointer; font-size: 6px; }
+.music-test-panel button:hover,
+.music-test-panel button:focus-visible { color: #071322; background: #6eeaf1; border-color: #e7ffff; outline: 1px solid #fff; }
+.music-test-panel label { display: grid; gap: 3px; color: #b8c9ec; }
+.music-test-panel input { width: 100%; accent-color: #62e4ed; }
+.music-test-panel output { min-height: 17px; padding: 4px; color: #9ff5cf; background: #09152c; border: 1px solid #33496d; }
+.music-test-panel small { color: #ffd585; line-height: 1.35; }

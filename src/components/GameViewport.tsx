@@ -9,6 +9,7 @@ import {
   type OrientationLike,
 } from '../game/immersive'
 import type { Point } from '../game/types'
+import { musicEngine } from '../audio/MusicEngine'
 
 interface GameCoordinateContextValue {
   scale: number
@@ -143,6 +144,8 @@ export function GameViewport({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setGlobalGameInputBlocked(inputBlocked)
+    if (inputBlocked) musicEngine.pause()
+    else musicEngine.resume()
     return () => setGlobalGameInputBlocked(false)
   }, [inputBlocked])
 

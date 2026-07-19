@@ -1,5 +1,6 @@
 import { emptySave } from './storage'
 import type { GameAction, GameState, HubSpawnId, SaveData, WorldMapId, WorldSpawnId } from './types'
+import { atmosphereAfterLabCompletion, unlockedAtmospheresForLabs } from '../world/atmosphere/atmospherePresets'
 
 export function createInitialState(stored: SaveData | null): GameState {
   return {
@@ -26,6 +27,14 @@ function atWorldLocation(save: SaveData, lastMap: WorldMapId, lastSpawn: WorldSp
     ...save,
     worldProgress: { ...save.worldProgress, ...updates, lastMap, lastSpawn },
   }
+}
+
+function withAtmosphereProgress(save: SaveData, completedLabs: SaveData['completedLabs'], completedLab: keyof SaveData['completedLabs']): Pick<SaveData, 'completedLabs' | 'unlockedAtmospheres' | 'atmosphereMode'> {
+  const unlockedAtmospheres = unlockedAtmospheresForLabs(completedLabs)
+  const atmosphereMode = save.completedLabs[completedLab]
+    ? save.atmosphereMode
+    : atmosphereAfterLabCompletion(save.atmosphereMode, save.completedLabs, completedLab)
+  return { completedLabs, unlockedAtmospheres, atmosphereMode }
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -128,12 +137,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (!state.currentLab) return state
       const lab = state.currentLab
       const achievement = `LAB_${lab.toUpperCase()}_COMPLETE`
+      const completedLabs = { ...state.save.completedLabs, [lab]: true }
       return {
         ...state,
         screen: 'LAB_COMPLETE',
         save: {
           ...state.save,
-          completedLabs: { ...state.save.completedLabs, [lab]: true },
+          ...withAtmosphereProgress(state.save, completedLabs, lab),
           stageProgress: { ...state.save.stageProgress, [lab]: 1 },
           achievements: state.save.achievements.includes(achievement)
             ? state.save.achievements
@@ -169,7 +179,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         hasStoredSave: true,
         save: {
           ...state.save,
-          completedLabs,
+          ...withAtmosphereProgress(state.save, completedLabs, 'cv'),
           stageProgress: { ...state.save.stageProgress, cv: 4 },
           achievements,
         },
@@ -205,7 +215,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         hasStoredSave: true,
         save: {
           ...state.save,
-          completedLabs,
+          ...withAtmosphereProgress(state.save, completedLabs, 'ml'),
           stageProgress: { ...state.save.stageProgress, ml: 4 },
           achievements,
         },
@@ -240,7 +250,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         hasStoredSave: true,
         save: {
           ...state.save,
-          completedLabs,
+          ...withAtmosphereProgress(state.save, completedLabs, 'nlp'),
           stageProgress: { ...state.save.stageProgress, nlp: 4 },
           achievements,
         },
@@ -266,12 +276,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const achievements = state.save.achievements.includes('NEURAL_CORE_ONLINE')
         ? [...state.save.achievements]
         : [...state.save.achievements, 'NEURAL_CORE_ONLINE']
+      const completedLabs = { ...state.save.completedLabs, dl: true }
       return {
         ...state,
         hasStoredSave: true,
         save: {
           ...state.save,
-          completedLabs: { ...state.save.completedLabs, dl: true },
+          ...withAtmosphereProgress(state.save, completedLabs, 'dl'),
           stageProgress: { ...state.save.stageProgress, dl: 4 },
           achievements,
         },
@@ -458,6 +469,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, save: { ...state.save, audioEnabled: !state.save.audioEnabled } }
     case 'SET_LANGUAGE':
       return { ...state, save: { ...state.save, language: action.language } }
+    case 'SET_ATMOSPHERE_MODE':
+      if (action.mode === 'sandstorm' || !state.save.unlockedAtmospheres.includes(action.mode)) return state
+      return { ...state, save: { ...state.save, atmosphereMode: action.mode } }
+    case 'SET_PARTICLE_QUALITY':
+      return { ...state, save: { ...state.save, particleQuality: action.quality } }
+    case 'MARK_RESEARCH_SANDSTORM_SEEN':
+      if (state.save.hasSeenResearchSandstorm) return state
+      return { ...state, save: { ...state.save, hasSeenResearchSandstorm: true } }
+    case 'ACKNOWLEDGE_ATMOSPHERE_TERMINAL':
+      if (!state.save.completedLabs.dl || state.save.hasUsedAtmosphereTerminal) return state
+      return { ...state, save: { ...state.save, hasUsedAtmosphereTerminal: true } }
     default:
       return state
   }

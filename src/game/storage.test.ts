@@ -35,6 +35,10 @@ describe('Project Origin save migration', () => {
     expect(migrated?.language).toBe('en')
     expect(migrated?.playerName).toBe('ORI')
     expect(migrated?.endingCompleted).toBe(false)
+    expect(migrated?.atmosphereMode).toBe('day')
+    expect(migrated?.unlockedAtmospheres).toEqual(['day', 'dusk', 'night'])
+    expect(migrated?.hasSeenResearchSandstorm).toBe(false)
+    expect(migrated?.hasUsedAtmosphereTerminal).toBe(false)
     expect(migrated?.worldProgress).toEqual({
       hallVisited: false,
       researchVisited: false,
@@ -51,6 +55,8 @@ describe('Project Origin save migration', () => {
     expect(emptySave().endingCompleted).toBe(false)
     expect(emptySave().language).toBe('en')
     expect(emptySave().worldProgress.lastMap).toBe('hub')
+    expect(emptySave().atmosphereMode).toBe('night')
+    expect(emptySave().unlockedAtmospheres).toEqual(['night'])
   })
 
   it('preserves valid Hall and Research progress without changing completed labs', () => {
@@ -159,5 +165,35 @@ describe('Project Origin save migration', () => {
 
     storage.setItem(SAVE_KEY, JSON.stringify({ ...base, language: 'unsupported' }))
     expect(loadSave()?.language).toBe('en')
+  })
+
+  it('migrates invalid atmosphere fields to progression-safe values', () => {
+    const storage = new MemoryStorage()
+    Object.defineProperty(globalThis, 'localStorage', { value: storage, configurable: true })
+    storage.setItem(SAVE_KEY, JSON.stringify({
+      playerName: 'ORI', introCompleted: true,
+      completedLabs: { cv: true, ml: false, nlp: false, dl: false },
+      stageProgress: { cv: 4, ml: 0, nlp: 0, dl: 0 },
+      achievements: ['MACHINES_FIRST_SIGHT'], audioEnabled: true,
+      atmosphereMode: 'sandstorm', unlockedAtmospheres: ['sandstorm', 'wrong'], particleQuality: 'ultra',
+    }))
+    const migrated = loadSave()
+    expect(migrated?.atmosphereMode).toBe('day')
+    expect(migrated?.unlockedAtmospheres).toEqual(['day', 'dusk', 'night'])
+    expect(migrated?.particleQuality).toBe('medium')
+  })
+
+  it('derives dusk for an old one-Lab save completed before CV', () => {
+    const storage = new MemoryStorage()
+    Object.defineProperty(globalThis, 'localStorage', { value: storage, configurable: true })
+    storage.setItem(SAVE_KEY, JSON.stringify({
+      playerName: 'ORI', introCompleted: true,
+      completedLabs: { cv: false, ml: true, nlp: false, dl: false },
+      stageProgress: { cv: 0, ml: 4, nlp: 0, dl: 0 },
+      achievements: ['PATTERN_FINDER'], audioEnabled: true,
+    }))
+    const migrated = loadSave()
+    expect(migrated?.atmosphereMode).toBe('dusk')
+    expect(migrated?.unlockedAtmospheres).toEqual(['dusk', 'night'])
   })
 })

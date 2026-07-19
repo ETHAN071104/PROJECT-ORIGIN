@@ -1,16 +1,12 @@
-let context: AudioContext | null = null
-
-function getContext() {
-  context ??= new AudioContext()
-  if (context.state === 'suspended') void context.resume()
-  return context
-}
+import { getAudioContext, resumeAudioContext } from './audioContext'
 
 type ToneKind = 'confirm' | 'step' | 'alarm' | 'incorrect' | 'complete' | 'connect' | 'power' | 'tune' | 'optimize'
 
 export function playTone(enabled: boolean, kind: ToneKind = 'confirm') {
-  if (!enabled || typeof AudioContext === 'undefined') return
-  const ctx = getContext()
+  if (!enabled) return
+  const ctx = getAudioContext()
+  if (!ctx) return
+  void resumeAudioContext(ctx)
   const oscillator = ctx.createOscillator()
   const gain = ctx.createGain()
   const now = ctx.currentTime
@@ -45,8 +41,10 @@ export function playTone(enabled: boolean, kind: ToneKind = 'confirm') {
 }
 
 export function playVoiceNote(enabled: boolean, frequency: number) {
-  if (!enabled || typeof AudioContext === 'undefined') return
-  const ctx = getContext()
+  if (!enabled) return
+  const ctx = getAudioContext()
+  if (!ctx) return
+  void resumeAudioContext(ctx)
   const oscillator = ctx.createOscillator()
   const harmony = ctx.createOscillator()
   const gain = ctx.createGain()
@@ -72,8 +70,10 @@ export function playVoiceNote(enabled: boolean, frequency: number) {
 type EndingCue = 'gate' | 'impact' | 'reveal' | 'core'
 
 export function playEndingCue(enabled: boolean, cue: EndingCue) {
-  if (!enabled || typeof AudioContext === 'undefined') return
-  const ctx = getContext()
+  if (!enabled) return
+  const ctx = getAudioContext()
+  if (!ctx) return
+  void resumeAudioContext(ctx)
   const now = ctx.currentTime
   const voices = cue === 'gate'
     ? [{ frequency: 72, target: 144, duration: 1.25, volume: 0.026, type: 'sawtooth' as OscillatorType }, { frequency: 288, target: 576, duration: .7, volume: 0.012, type: 'triangle' as OscillatorType }]

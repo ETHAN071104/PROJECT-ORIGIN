@@ -17,6 +17,8 @@ import { sameActiveInteractable, selectActiveInteractable, type ActiveInteractab
 import type { Point } from '../game/types'
 import { usePlayerMovement } from '../hooks/usePlayerMovement'
 import { isVoiceAbilityAvailable, useVoiceExpression } from '../hooks/useVoiceExpression'
+import { AtmosphereRenderer } from '../world/atmosphere/AtmosphereRenderer'
+import { useAtmosphere } from '../world/atmosphere/AtmosphereProvider'
 
 const FUTURE_MODULES = [
   {
@@ -107,6 +109,11 @@ function FinalGatePanel({ align, endingCompleted, onBegin, onClose }: { align: '
 
 export function ResearchMapScene() {
   const { state, dispatch } = useGame()
+  const atmosphere = useAtmosphere()
+
+  useEffect(() => {
+    void atmosphere.playResearchSandstorm()
+  }, [atmosphere.playResearchSandstorm])
   const [activePanel, setActivePanel] = useState<ActivePanel | null>(null)
   const transitioned = useRef(false)
   const spawn = RESEARCH_SPAWNS[state.researchSpawn]
@@ -205,7 +212,8 @@ export function ResearchMapScene() {
         <div><span>FINAL GATE</span><strong>{state.save.endingCompleted ? 'ACCESSED' : state.save.worldProgress.finalGateReached ? 'OPEN' : 'DETECTED'}</strong></div>
       </div>
 
-      <div className="research-map research-complex-map" aria-label="Research Lab Complex with three sealed future modules and the Archive Zero Final Gate">
+      <div className={`research-map research-complex-map ${atmosphere.mode === 'sandstorm' ? 'atmosphere-host' : ''}`} aria-label="Research Lab Complex with three sealed future modules and the Archive Zero Final Gate">
+        {atmosphere.mode === 'sandstorm' && <AtmosphereRenderer map="research" />}
         <div className="complex-wall-grid" aria-hidden="true" />
         <div className="complex-floor" aria-hidden="true" />
         <div className="complex-entrance-sign">← CENTRAL PLAZA</div>
@@ -227,22 +235,12 @@ export function ResearchMapScene() {
           </section>
         ))}
 
-        <div className="final-corridor" aria-hidden="true">
-          <i /><i /><i /><i />
-          <div className="corridor-origin-symbol"><b>ORIGIN</b><span /></div>
-          <div className="corridor-module-lights"><span>CV</span><span>ML</span><span>NLP</span><span>DL</span></div>
-        </div>
-
         <section className={`archive-zero-gate ${state.save.endingCompleted ? 'is-accessed' : state.save.worldProgress.finalGateReached ? 'is-open' : ''}`} aria-label="Archive Zero Final Gate">
-          <div className="archive-zero-rails" aria-hidden="true"><i /><i /><i /><i /></div>
-          <div className="archive-zero-crown"><i /><i /><b /></div>
           <span>FINAL GATE</span><strong>ARCHIVE ZERO</strong>
           <div className="archive-zero-status" aria-hidden="true"><i />{state.save.endingCompleted ? 'ORIGIN RECORD ACCESSED' : state.save.worldProgress.finalGateReached ? 'ORIGIN PATH OPEN' : 'ORIGIN SEAL // PENDING'}<i /></div>
           <div className="archive-zero-door">
             <i /><i /><b /><span />
-            <div className="archive-zero-lock-core" aria-hidden="true"><i /><i /><i /><b /></div>
           </div>
-          <div className="archive-zero-foundation" aria-hidden="true"><i /><b>FINAL ACCESS</b><i /></div>
           <div className="archive-zero-scanner">SCAN<i /></div>
         </section>
 
