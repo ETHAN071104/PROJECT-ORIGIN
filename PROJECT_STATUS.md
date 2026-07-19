@@ -6,7 +6,8 @@ Updated: 2026-07-18
 
 - React, Vite, and strict TypeScript browser application with a reducer-driven game state machine.
 - Fixed 960 x 540 logical game viewport with centered 16:9 scaling, letterboxing, safe-area support, a portrait rotation overlay, and logical pointer conversion.
-- Screenshot-guided PROJECT ORIGIN archive title screen with a dedicated pixel-art academy backdrop, New Game, save-aware Continue, Developer Details, and persisted sound setting.
+- Screenshot-guided PROJECT ORIGIN archive title screen with a dedicated pixel-art academy backdrop, New Game, save-aware Continue, separate Creator Record and Project Record panels, and persisted sound setting.
+- Creator Record presents Ethan Lim's creator, role, education, Malaysia location, project statement, and keyboard/touch-accessible GitHub and LinkedIn links. Project Record keeps the game format, curriculum, input, and project description separate from the biography.
 - Mandatory survival-origin opening, name entry, academy arrival, continuous keyboard movement, mobile landscape controls, and named door return spawns.
 - Compact AI Academy hub with walkable CV, ML, NLP, and foundation-gated DL buildings around an environmental ORIGIN plaza, followed by the gated Hall of Origins and Research Lab Complex.
 - Reusable portrait, typewriter, choice-dialogue, achievement, stage-success, hint, and replay systems.
@@ -92,6 +93,7 @@ Updated: 2026-07-18
 ## Completed History Events and People Gallery content
 
 - Every foundational Lab interior keeps its central gameplay terminal and adds two optional side exhibits: Shakey and AlexNet in CV, Arthur Samuel and AlphaGo in ML, ELIZA and the Transformer in NLP, and backpropagation popularization and Deep Belief Nets in DL.
+- Every Lab interior now also has two cyan plants in white pixel pots, a readable subject-specific whiteboard, and a themed workbench. CV displays a camera and two lenses; ML, NLP, and DL use data, language, and neural-network props respectively.
 - The shared exhibit component supports `E`, Enter, Space, touch interaction, close controls, concise first pages, optional Why It Matters pages, read-state lights, and opposite-side panels that do not cover the player.
 - `src/data/historyArchive.ts` centralizes all historical entries, people records, Modern Builders wording, categories, dates, and original procedural icon keys.
 - AI History Events contains only event terminals: 12 chronological records from 1950 through 2023, including the 1986 backpropagation-popularization milestone, paired Shakey/ELIZA, Claude/Gemini, and the explicit limited-timeline archive note.
@@ -118,8 +120,9 @@ Updated: 2026-07-18
 ## Completed Research Lab Complex structure
 
 - The Research map now progresses from a west entrance through Reinforcement Learning, Generative AI, and Agent Intelligence wings to the final corridor and ARCHIVE ZERO.
-- All three future-module doors are visibly distinct, explicitly marked `FUTURE MODULE / ACCESS LOCKED`, and cannot be entered.
+- All three future-module doors are visibly distinct, explicitly marked `FUTURE MODULE / LOCKED / COMING SOON / TO BE UPDATED`, and cannot be entered.
 - The final corridor visually transitions toward unknown technology, converges cables around the ORIGIN symbol, and reacts with all four restored module lights.
+- ARCHIVE ZERO now has a layered crown, cyan-violet energy rails, an `ORIGIN SEAL // PENDING` status plate, a larger multi-part lock core, and a `FINAL ACCESS` foundation without changing its pending narrative state.
 - ARCHIVE ZERO scans CV, ML, NLP, and DL as restored, then displays `FOUNDATIONAL INTELLIGENCE RESTORED`, `ORIGIN RECORD DETECTED`, and `AUTHORIZATION PENDING`.
 - The Final Gate records that it was reached but does not reveal the protagonist's origin, invent a villain, enter the dormant ending scene, or end the game.
 
@@ -179,7 +182,7 @@ Storage key: `project-origin-save-v1`
 ## Known limitations
 
 - The true origin room, protagonist origin reveal, final narrative resolution, and ending remain intentionally unimplemented.
-- The revised History branch received browser traversal coverage, but direct Research browser traversal and the complete four-Lab curriculum click-through were not rerun in this phase because the available local save had only CV complete and the Lab mini-games were deliberately left unchanged.
+- The revised History branch received browser traversal coverage. Direct Research traversal and the complete four-Lab curriculum click-through were not rerun in this phase because the available save did not unlock the route and the Lab mini-games were deliberately left unchanged; Research received a non-persisting visual preview check instead.
 - iOS/iPadOS does not expose the standard install prompt or general element fullscreen consistently; the game therefore shows Add to Home Screen guidance and preserves Continue in Browser rather than claiming success.
 - Service workers and native installation require a secure production origin (HTTPS, with localhost accepted for development). Vite development mode intentionally does not register the service worker to avoid stale local bundles.
 - Audio remains intentionally limited to generated tones.
@@ -204,7 +207,10 @@ Storage key: `project-origin-save-v1`
 - Immersion tests verify mobile-gate state, desktop/standalone bypass, non-UA touch detection, unsupported/rejected fullscreen fallback, and safe orientation-lock rejection.
 - Browser traversal verified Hub south to the 12-event History map, continued south to the separate eight-person People Gallery, and returned north through both boundaries to Hub on a one-of-four save.
 - History Events and People Gallery were visually checked as separate rooms with no mixed record types. The fixed frame, no-scroll layout, and virtual controls were checked at 844 x 390 and 740 x 360; the portrait guard was checked at 390 x 844.
+- CV, ML, and NLP Lab interiors were visually checked in the running game: whiteboards and workbench props remained legible, both plants stayed inside the frame, and neither history exhibit was obscured. The CV camera and two lenses were specifically verified.
+- Research received a non-persisting development preview check: all three future-module signs were visible in front of their locked doors, and the revised ARCHIVE ZERO gate remained fully readable inside the fixed frame. The temporary preview path was removed afterward.
 - PWA output contains a standalone manifest, valid 192 x 192 and 512 x 512 PNG icons, service worker, and production offline-shell resources.
+- Title-page browser QA verified both record dialogs, safe new-tab attributes on both creator links, initial focus, Escape closing, focus return, and the five-item menu staying inside the fixed frame.
 
 ## Prior verification archive
 

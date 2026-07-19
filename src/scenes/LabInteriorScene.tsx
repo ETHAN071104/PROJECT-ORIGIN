@@ -9,8 +9,73 @@ import { labs } from '../data/labs'
 import { LAB_BOUNDS, LAB_CONSOLE_TARGET, LAB_EXHIBIT_TARGETS, LAB_SPAWN } from '../data/maps'
 import { useGame } from '../game/GameContext'
 import { sameActiveInteractable, selectActiveInteractable, type ActiveInteractable, type InteractionCandidate } from '../game/interactions'
-import type { Point } from '../game/types'
+import type { LabId, Point } from '../game/types'
 import { usePlayerMovement } from '../hooks/usePlayerMovement'
+
+const LAB_WHITEBOARD_COPY: Record<LabId, { title: string; formula: string; note: string }> = {
+  cv: { title: 'VISION NOTES', formula: 'FRAME > FOCUS > FEATURE', note: 'LIGHT BECOMES DATA' },
+  ml: { title: 'TRAINING NOTES', formula: 'INPUT > PATTERN > PREDICT', note: 'TEST. LEARN. REPEAT.' },
+  nlp: { title: 'LANGUAGE NOTES', formula: 'TOKEN + CONTEXT = MEANING', note: 'WORDS CARRY SIGNALS' },
+  dl: { title: 'NETWORK NOTES', formula: 'SIGNAL > LAYERS > LOSS', note: 'DEEPER IS NOT ALWAYS CLEARER' },
+}
+
+function LabWorkbenchProps({ labId }: { labId: LabId }) {
+  if (labId === 'cv') {
+    return (
+      <>
+        <div className="bench-camera"><i /><b /><span /></div>
+        <div className="bench-lens lens-wide"><i /></div>
+        <div className="bench-lens lens-small"><i /></div>
+      </>
+    )
+  }
+
+  if (labId === 'ml') {
+    return (
+      <>
+        <div className="bench-data-screen"><i /><i /><i /><b /></div>
+        <div className="bench-data-chip"><i /><i /><b /></div>
+      </>
+    )
+  }
+
+  if (labId === 'nlp') {
+    return (
+      <>
+        <div className="bench-books"><i /><i /><i /></div>
+        <div className="bench-speech-card"><i /><b /></div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <div className="bench-network"><i /><i /><i /><i /><b /><b /></div>
+      <div className="bench-core-sample"><i /></div>
+    </>
+  )
+}
+
+function LabDecor({ labId }: { labId: LabId }) {
+  const copy = LAB_WHITEBOARD_COPY[labId]
+  return (
+    <div className={`lab-decor lab-decor-${labId}`} aria-hidden="true">
+      <div className="lab-whiteboard">
+        <span>{copy.title}</span>
+        <strong>{copy.formula}</strong>
+        <small>{copy.note}</small>
+        <i /><i /><i />
+      </div>
+      <div className="lab-workbench">
+        <div className="lab-workbench-props"><LabWorkbenchProps labId={labId} /></div>
+        <div className="lab-workbench-top"><i /><i /></div>
+        <div className="lab-workbench-base"><i /><i /><b /></div>
+      </div>
+      <div className="lab-planter planter-left"><div className="cyan-plant"><i /><i /><i /><b /></div><span /></div>
+      <div className="lab-planter planter-right"><div className="cyan-plant"><i /><i /><i /><b /></div><span /></div>
+    </div>
+  )
+}
 
 export function LabInteriorScene() {
   const { state, dispatch } = useGame()
@@ -106,6 +171,7 @@ export function LabInteriorScene() {
       </div>
       <div className="lab-room">
         <div className="lab-backwall"><i /><i /><i /></div>
+        <LabDecor labId={lab.id} />
         <div className="mentor-console">
           <div className="console-screen"><span>{state.save.completedLabs[lab.id] ? 'REPLAY' : 'READY'}</span><i /></div>
           <div className="console-base" />

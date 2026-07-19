@@ -380,6 +380,45 @@ button { -webkit-tap-highlight-color: transparent; }
 .room-cable { position: absolute; top: 35%; width: 34%; height: 5%; border-bottom: 4px solid var(--lab-accent); opacity: .5; }.cable-a { left: 8%; transform: skewY(8deg); }.cable-b { right: 8%; transform: skewY(-8deg); }
 .lab-exit { position: absolute; left: 45%; bottom: 2%; width: 10%; height: 9%; display: grid; place-items: center; color: #8490a3; background: #090c1c; border: 3px solid #39445e; font-size: clamp(6px, .75cqw, 10px); }
 
+/* Shared environmental dressing for all four teaching labs. */
+.lab-decor { position: absolute; z-index: 2; inset: 0; pointer-events: none; }
+.lab-whiteboard { position: absolute; left: 14.5%; top: 7%; width: 23%; height: 18%; padding: 11px 13px 8px; overflow: hidden; color: #18232c; background: #dce8e6; border: 5px solid #687987; box-shadow: inset 0 0 0 4px #f3f7ef, 5px 6px #0e1527; }
+.lab-whiteboard::before { content: ""; position: absolute; left: 8px; right: 8px; bottom: 5px; height: 3px; background: #798b92; box-shadow: 0 3px #b8c7c6; }
+.lab-whiteboard > span, .lab-whiteboard > strong, .lab-whiteboard > small { position: relative; z-index: 2; display: block; }
+.lab-whiteboard > span { color: #2d6971; font-size: 6px; font-weight: 900; letter-spacing: .12em; }
+.lab-whiteboard > strong { margin-top: 9px; color: #1e3742; font-size: 8px; line-height: 1.2; }
+.lab-whiteboard > small { margin-top: 5px; color: #62777b; font-size: 5px; }
+.lab-whiteboard > i { position: absolute; right: 13px; width: 38px; height: 3px; background: var(--lab-accent); opacity: .75; }
+.lab-whiteboard > i:nth-of-type(1) { top: 16px; }.lab-whiteboard > i:nth-of-type(2) { top: 23px; width: 28px; }.lab-whiteboard > i:nth-of-type(3) { right: 6px; bottom: 7px; width: 16px; height: 5px; background: #cf6979; }
+
+.lab-workbench { position: absolute; right: 10.5%; top: 14%; width: 25%; height: 34%; }
+.lab-workbench-top { position: absolute; z-index: 2; left: 0; right: 0; top: 49%; height: 14%; background: #87939e; border: 4px solid #313d50; box-shadow: inset 0 4px #c2cbca, 5px 6px #0e1425; }
+.lab-workbench-top > i { position: absolute; top: 4px; bottom: 4px; width: 4px; background: var(--lab-accent); }.lab-workbench-top > i:first-child { left: 13px; }.lab-workbench-top > i:last-child { right: 13px; }
+.lab-workbench-base { position: absolute; left: 8%; right: 8%; top: 61%; bottom: 0; background: #3d4b5f; border: 4px solid #202b40; box-shadow: inset 0 -8px #28354a; }
+.lab-workbench-base > i { position: absolute; top: 8px; bottom: 8px; width: 7px; background: #1c273b; }.lab-workbench-base > i:first-child { left: 15px; }.lab-workbench-base > i:nth-child(2) { right: 15px; }.lab-workbench-base > b { position: absolute; left: 50%; top: 10px; width: 8px; height: 8px; transform: translateX(-50%); background: var(--lab-accent); box-shadow: 0 0 7px var(--lab-accent); }
+.lab-workbench-props { position: absolute; z-index: 3; left: 5%; right: 5%; top: 0; height: 52%; }
+
+.bench-camera { position: absolute; left: 23%; bottom: 3px; width: 56px; height: 35px; background: #c7d0cf; border: 4px solid #344255; box-shadow: inset 0 -7px #6e7f8f; }
+.bench-camera::before { content: ""; position: absolute; left: 7px; top: -10px; width: 20px; height: 9px; background: #8e9ba4; border: 3px solid #344255; }
+.bench-camera > i { position: absolute; left: 16px; top: 5px; width: 22px; height: 22px; border-radius: 50%; background: #102036; border: 5px solid var(--lab-accent); box-shadow: inset 0 0 0 4px #273e59, 0 0 8px var(--lab-accent); }
+.bench-camera > b { position: absolute; right: 4px; top: 5px; width: 5px; height: 5px; background: #d9fbf7; }.bench-camera > span { position: absolute; left: 5px; bottom: 5px; width: 6px; height: 4px; background: #263449; }
+.bench-lens { position: absolute; bottom: 4px; width: 28px; height: 28px; border-radius: 50%; background: #152239; border: 5px solid #91a1aa; box-shadow: inset 0 0 0 4px #29425a; }.bench-lens > i { position: absolute; inset: 7px; border-radius: 50%; background: var(--lab-accent); box-shadow: 0 0 7px var(--lab-accent); }
+.bench-lens.lens-wide { right: 13%; }.bench-lens.lens-small { right: 1%; bottom: 6px; width: 20px; height: 20px; border-width: 4px; }.bench-lens.lens-small > i { inset: 5px; }
+
+.bench-data-screen { position: absolute; left: 16%; right: 35%; bottom: 2px; height: 48px; background: #10192f; border: 4px solid #7785a7; box-shadow: inset 0 0 0 3px #26314e; }
+.bench-data-screen > i { position: absolute; bottom: 7px; width: 8px; background: var(--lab-accent); }.bench-data-screen > i:first-child { left: 9px; height: 12px; }.bench-data-screen > i:nth-child(2) { left: 22px; height: 24px; }.bench-data-screen > i:nth-child(3) { left: 35px; height: 34px; }.bench-data-screen > b { position: absolute; left: 7px; right: 7px; top: 7px; height: 3px; background: #56698a; }
+.bench-data-chip { position: absolute; right: 7%; bottom: 4px; width: 43px; height: 34px; background: #233354; border: 4px solid var(--lab-accent); box-shadow: inset 0 0 0 5px #10172c; }.bench-data-chip > i { position: absolute; top: 4px; bottom: 4px; width: 3px; background: #dffdf5; }.bench-data-chip > i:first-child { left: 8px; }.bench-data-chip > i:nth-child(2) { right: 8px; }.bench-data-chip > b { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; transform: translate(-50%, -50%) rotate(45deg); background: var(--lab-accent); }
+
+.bench-books { position: absolute; left: 14%; bottom: 3px; width: 67px; height: 45px; }.bench-books > i { position: absolute; left: 0; right: 0; height: 12px; border: 3px solid #2b3550; }.bench-books > i:first-child { bottom: 0; background: #c28ad5; }.bench-books > i:nth-child(2) { left: 8px; right: 4px; bottom: 13px; background: #7ca6d8; }.bench-books > i:nth-child(3) { left: 3px; right: 10px; bottom: 26px; background: #e5d8bd; }
+.bench-speech-card { position: absolute; right: 8%; bottom: 5px; width: 55px; height: 38px; background: #e3e9e4; border: 4px solid #5e6c81; }.bench-speech-card::after { content: ""; position: absolute; right: 6px; bottom: -10px; border-style: solid; border-width: 9px 0 0 12px; border-color: transparent transparent transparent #5e6c81; }.bench-speech-card > i, .bench-speech-card > b { position: absolute; left: 7px; right: 7px; height: 4px; background: var(--lab-accent); }.bench-speech-card > i { top: 8px; }.bench-speech-card > b { top: 18px; right: 17px; background: #8795a0; }
+
+.bench-network { position: absolute; left: 13%; bottom: 1px; width: 92px; height: 50px; border-bottom: 4px solid #596786; }.bench-network > i { position: absolute; width: 12px; height: 12px; background: #d9f7ff; border: 3px solid var(--lab-accent); box-shadow: 0 0 6px var(--lab-accent); }.bench-network > i:nth-child(1) { left: 2px; top: 19px; }.bench-network > i:nth-child(2) { left: 36px; top: 2px; }.bench-network > i:nth-child(3) { left: 36px; bottom: 2px; }.bench-network > i:nth-child(4) { right: 2px; top: 19px; }.bench-network > b { position: absolute; left: 17px; top: 25px; width: 25px; height: 3px; background: var(--lab-accent); transform: rotate(-27deg); }.bench-network > b:last-child { left: 50px; transform: rotate(27deg); }
+.bench-core-sample { position: absolute; right: 4%; bottom: 4px; width: 33px; height: 33px; transform: rotate(45deg); background: #222944; border: 4px solid var(--lab-accent); box-shadow: 0 0 8px var(--lab-accent); }.bench-core-sample > i { position: absolute; inset: 9px; background: #dcf8ff; }
+
+.lab-planter { position: absolute; top: 48%; width: 58px; height: 116px; }.lab-planter.planter-left { left: 2.5%; }.lab-planter.planter-right { right: 2.5%; }
+.lab-planter > span { position: absolute; left: 8px; right: 8px; bottom: 0; height: 36px; background: #edf4ee; border: 4px solid #86959c; box-shadow: inset 0 -8px #c3cfcb, 5px 5px #0d1325; clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%); }
+.cyan-plant { position: absolute; left: 5px; right: 5px; top: 0; height: 88px; }.cyan-plant > i { position: absolute; width: 24px; height: 38px; background: #4fc5c5; border: 4px solid #226f7c; box-shadow: inset -5px -5px #3599a2; }.cyan-plant > i:nth-child(1) { left: 13px; top: 0; }.cyan-plant > i:nth-child(2) { left: 0; top: 30px; transform: rotate(-18deg); }.cyan-plant > i:nth-child(3) { right: 0; top: 26px; transform: rotate(18deg); }.cyan-plant > b { position: absolute; left: 24px; top: 34px; width: 6px; height: 54px; background: #75dadd; box-shadow: -12px 12px #75dadd, 12px 9px #75dadd; }
+
 /* Portraits and dialogue */
 .portrait { width: clamp(120px, 22cqw, 300px); aspect-ratio: .88; opacity: .72; transform: scale(.94); transition: transform .2s steps(2), opacity .2s steps(2); }
 .portrait.is-speaking { opacity: 1; transform: scale(1); }

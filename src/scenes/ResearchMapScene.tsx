@@ -212,6 +212,7 @@ export function ResearchMapScene() {
             <strong>{module.title}</strong>
             <small>{module.subtitle}</small>
             <div className="sealed-door-face"><i /><b>LOCKED</b></div>
+            <div className="future-release-sign" aria-hidden="true"><i /><span>COMING SOON</span><small>TO BE UPDATED</small></div>
           </section>
         ))}
 
@@ -222,9 +223,15 @@ export function ResearchMapScene() {
         </div>
 
         <section className="archive-zero-gate" aria-label="Archive Zero Final Gate">
+          <div className="archive-zero-rails" aria-hidden="true"><i /><i /><i /><i /></div>
           <div className="archive-zero-crown"><i /><i /><b /></div>
           <span>FINAL GATE</span><strong>ARCHIVE ZERO</strong>
-          <div className="archive-zero-door"><i /><i /><b /><span /></div>
+          <div className="archive-zero-status" aria-hidden="true"><i />ORIGIN SEAL // PENDING<i /></div>
+          <div className="archive-zero-door">
+            <i /><i /><b /><span />
+            <div className="archive-zero-lock-core" aria-hidden="true"><i /><i /><i /><b /></div>
+          </div>
+          <div className="archive-zero-foundation" aria-hidden="true"><i /><b>FINAL ACCESS</b><i /></div>
           <div className="archive-zero-scanner">SCAN<i /></div>
         </section>
 
