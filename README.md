@@ -17,6 +17,8 @@ Restore Computer Vision, Machine Learning, Natural Language Processing, and Deep
 | **Runtime** | Fully client-side; no backend or account required |
 | **Stack** | React, TypeScript, Vite, CSS pixel art, Web Audio |
 
+[Play online](https://project-origin-gold.vercel.app)
+
 ## **Built with Codex & GPT-5.6**
 
 > [!IMPORTANT]
@@ -148,12 +150,18 @@ More detail is available in the [product specification](./PROJECT_SPEC.md), [pro
 - **Small but complete** — a focused journey with one canonical ending instead of an unfinished open world.
 - **Original and local-first** — no copyrighted game assets, remote image dependency, backend, or account system.
 
+## Known limitations
+
+- The activities are deterministic teaching simulations, not live machine-learning inference.
+- Progress is stored only in the current browser and does not sync across devices.
+- Mobile play targets landscape orientation and still depends on browser-specific PWA behavior.
+- The fixed `960 × 540` logical frame prioritizes pixel-art consistency over arbitrary aspect ratios.
+
 ## Creator
 
-**Ethan Lim**  
-AI Builder · Product-minded Developer  
-Bachelor of Artificial Intelligence, Universiti Teknologi Malaysia  
-Based in Malaysia
+**Ethan Lim**
+
+Software Engineering student at the University of Malaya, based in Malaysia.
 
 - [GitHub](https://github.com/ETHAN071104)
 - [LinkedIn](https://www.linkedin.com/in/ethan-lim-462a833bb/)
